@@ -76,8 +76,7 @@ private final class BrowserRuntime {
         browsingHistoryRepository: browsingHistoryRepository
     )
     private var privateDownloadManagers: [WeakDownloadManager] = []
-    private var windowModels: [WeakBrowserWindowModel] = []
-    private var standardWindowCount = 0
+    private var standardWindowModels: [WeakBrowserWindowModel] = []
     private var hasClaimedOnboarding = false
 
     init() {
@@ -113,11 +112,11 @@ private final class BrowserRuntime {
             )
         }
 
-        let isPrimaryWindow = standardWindowCount == 0
+        standardWindowModels.removeAll { $0.value == nil }
+        let isPrimaryWindow = standardWindowModels.isEmpty
         let windowID = isPrimaryWindow
             ? BrowserPersistenceController.primaryWindowID
             : UUID()
-        standardWindowCount += 1
         let sessionRepository: any SessionRepository
         if let persistenceController {
             sessionRepository = persistenceController.sessionRepository(
@@ -132,23 +131,22 @@ private final class BrowserRuntime {
             )
         }
 
-        return register(
-            BrowserWindowModel(
-                repository: sessionRepository,
-                sitePermissionRepository: FileSitePermissionRepository(),
-                browsingHistoryRepository: browsingHistoryRepository,
-                bookmarkRepository: bookmarkRepository,
-                downloadManager: downloadManager,
-                isPrivate: false,
-                websiteDataStore: .default()
-            )
+        let model = BrowserWindowModel(
+            repository: sessionRepository,
+            sitePermissionRepository: FileSitePermissionRepository(),
+            browsingHistoryRepository: browsingHistoryRepository,
+            downloadManager: downloadManager,
+            isPrivate: false,
+            websiteDataStore: .default()
         )
+        standardWindowModels.append(WeakBrowserWindowModel(model))
+        return model
     }
 
-    private func register(_ model: BrowserWindowModel) -> BrowserWindowModel {
-        windowModels.removeAll { $0.value == nil }
-        windowModels.append(WeakBrowserWindowModel(model))
-        return model
+    func releaseWindowModel(_ model: BrowserWindowModel) {
+        standardWindowModels.removeAll {
+            $0.value == nil || $0.value === model
+        }
     }
 
     /// Decides whether this window presents the welcome tour.
@@ -172,9 +170,9 @@ private final class BrowserRuntime {
 
     func prepareForTermination() async {
         privateDownloadManagers.removeAll { $0.value == nil }
-        windowModels.removeAll { $0.value == nil }
+        standardWindowModels.removeAll { $0.value == nil }
 
-        for model in windowModels.compactMap(\.value) {
+        for model in standardWindowModels.compactMap(\.value) {
             await model.closeAllTabsForTermination()
         }
 
@@ -240,8 +238,25 @@ private struct BrowserWindowScene: View {
     var body: some View {
         BrowserWindowView(
             model: model,
-            isOnboardingPresented: $isOnboardingPresented
+            isOnboardingPresented: $isOnboardingPresented,
+            availableUpdate: isPrivate
+                ? nil
+                : runtime.manualUpdateCoordinator.availableRelease,
+            updateDownloadState: runtime.manualUpdateCoordinator.downloadPresentationState,
+            onInstallUpdate: { release in
+                runtime.manualUpdateCoordinator.beginDownload(release)
+            },
+            onCancelUpdateDownload: {
+                runtime.manualUpdateCoordinator.cancelDownload()
+            },
+            onRevealDownloadedUpdate: {
+                runtime.manualUpdateCoordinator.revealDownloadedUpdate()
+            }
         )
+            .handlesExternalEvents(
+                preferring: isPrivate ? [] : ["*"],
+                allowing: isPrivate ? [] : ["*"]
+            )
             .task {
                 model.openWindowRequest = { shouldOpenPrivateWindow in
                     openWindow(
@@ -272,6 +287,10 @@ private struct BrowserWindowScene: View {
             .onOpenURL { url in
                 guard !isPrivate else { return }
                 model.openExternalURL(url)
+            }
+            .onDisappear {
+                guard !isPrivate else { return }
+                runtime.releaseWindowModel(model)
             }
             .onReceive(
                 NotificationCenter.default.publisher(
@@ -316,8 +335,22 @@ private final class ManualUpdateCoordinator {
     private(set) var availableRelease: AvailableRelease?
     private(set) var isUpdatePromptPresented = false
     private(set) var isDownloading = false
-    private(set) var isInstallationInstructionsPresented = false
+    private(set) var downloadProgress: Double?
+    private(set) var downloadedUpdateURL: URL?
     private(set) var downloadErrorMessage: String?
+
+    var downloadPresentationState: BrowserUpdateDownloadState {
+        if isDownloading {
+            return .downloading(progress: downloadProgress)
+        }
+        if downloadedUpdateURL != nil {
+            return .ready
+        }
+        if downloadErrorMessage != nil {
+            return .failed
+        }
+        return .idle
+    }
 
     init(
         configuration: ReleaseUpdateConfiguration = .appBundle,
@@ -354,16 +387,11 @@ private final class ManualUpdateCoordinator {
         isUpdatePromptPresented = false
     }
 
-    func dismissInstallationInstructions() {
-        isInstallationInstructionsPresented = false
-    }
-
-    func dismissDownloadError() {
-        downloadErrorMessage = nil
-    }
-
     func beginDownload(_ release: AvailableRelease) {
         guard downloadTask == nil else { return }
+        downloadedUpdateURL = nil
+        downloadErrorMessage = nil
+        downloadProgress = 0
         downloadTask = Task { @MainActor [weak self] in
             await self?.download(release)
         }
@@ -373,18 +401,28 @@ private final class ManualUpdateCoordinator {
         downloadTask?.cancel()
     }
 
+    func revealDownloadedUpdate() {
+        guard let downloadedUpdateURL else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([downloadedUpdateURL])
+    }
+
     private func download(_ release: AvailableRelease) async {
         guard !isDownloading else { return }
         isDownloading = true
-        downloadErrorMessage = nil
         defer {
             isDownloading = false
             downloadTask = nil
         }
 
         do {
+            let progressDelegate = ManualUpdateDownloadProgressDelegate {
+                [weak self] progress in
+                guard self?.isDownloading == true else { return }
+                self?.downloadProgress = progress
+            }
             let (temporaryURL, response) = try await URLSession.shared.download(
-                from: release.asset.downloadURL
+                from: release.asset.downloadURL,
+                delegate: progressDelegate
             )
             guard let httpResponse = response as? HTTPURLResponse,
                   (200 ... 299).contains(httpResponse.statusCode)
@@ -395,12 +433,16 @@ private final class ManualUpdateCoordinator {
                 temporaryURL,
                 filename: release.asset.name
             )
-            NSWorkspace.shared.activateFileViewerSelecting([downloadedURL])
-            isInstallationInstructionsPresented = true
+            downloadProgress = 1
+            downloadedUpdateURL = downloadedURL
         } catch is CancellationError {
             // A cancelled download is intentional and should not create a
             // persistent or repeated error prompt.
+            downloadProgress = nil
+        } catch let error as URLError where error.code == .cancelled {
+            downloadProgress = nil
         } catch {
+            downloadProgress = nil
             downloadErrorMessage = BrowserLocalization.string("update_download_failed")
         }
     }
@@ -433,10 +475,12 @@ private final class ManualUpdateCoordinator {
                 installedVersion: installedVersion
             ) else { return .upToDate }
             let version = release.version.description
+            // Keep the sidebar entry available on every launch, even after a
+            // person has already dismissed the one-time native prompt.
+            availableRelease = release
             guard defaults.string(forKey: Self.lastPromptedVersionKey) != version else {
                 return .updateAvailable
             }
-            availableRelease = release
             defaults.set(version, forKey: Self.lastPromptedVersionKey)
             isUpdatePromptPresented = true
             return .updateAvailable
@@ -552,42 +596,37 @@ private struct ManualUpdateAlertModifier: ViewModifier {
                     release.version.description
                 ))
             }
-            .alert(
-                BrowserLocalization.string("update_ready_title"),
-                isPresented: Binding(
-                    get: { coordinator.isInstallationInstructionsPresented },
-                    set: { if !$0 { coordinator.dismissInstallationInstructions() } }
-                )
-            ) {
-                Button(BrowserLocalization.string("done"), role: .cancel) {}
-            } message: {
-                Text(BrowserLocalization.string("update_ready_instructions"))
-            }
-            .alert(
-                BrowserLocalization.string("update_downloading_title"),
-                isPresented: Binding(
-                    get: { coordinator.isDownloading },
-                    set: { if !$0 { coordinator.cancelDownload() } }
-                )
-            ) {
-                Button(BrowserLocalization.string("cancel"), role: .cancel) {
-                    coordinator.cancelDownload()
-                }
-            } message: {
-                Text(BrowserLocalization.string("update_downloading_message"))
-            }
-            .alert(
-                BrowserLocalization.string("update_download_failed_title"),
-                isPresented: Binding(
-                    get: { coordinator.downloadErrorMessage != nil },
-                    set: { if !$0 { coordinator.dismissDownloadError() } }
-                )
-            ) {
-                Button(BrowserLocalization.string("done"), role: .cancel) {}
-            } message: {
-                Text(coordinator.downloadErrorMessage ?? "")
-            }
     }
+}
+
+private final class ManualUpdateDownloadProgressDelegate: NSObject,
+    URLSessionDownloadDelegate, @unchecked Sendable {
+    private let progressHandler: @MainActor @Sendable (Double?) -> Void
+
+    init(progressHandler: @escaping @MainActor @Sendable (Double?) -> Void) {
+        self.progressHandler = progressHandler
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        let progress = totalBytesExpectedToWrite > 0
+            ? min(max(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite), 0), 1)
+            : nil
+        Task { @MainActor [progressHandler] in
+            progressHandler(progress)
+        }
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {}
 }
 
 @MainActor

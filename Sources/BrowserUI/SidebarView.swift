@@ -8,6 +8,11 @@ import UniformTypeIdentifiers
 struct SidebarView: View {
     let model: BrowserWindowModel
     let isFullScreen: Bool
+    let width: CGFloat
+    let availableUpdate: AvailableRelease?
+    let updateDownloadState: BrowserUpdateDownloadState
+    let onCancelUpdateDownload: () -> Void
+    let onShowUpdateDetails: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -216,6 +221,17 @@ struct SidebarView: View {
                 .padding(.horizontal, 10)
                 .padding(.top, 7)
                 .padding(.bottom, 10)
+
+            if let availableUpdate {
+                UpdateAvailableSidebarRow(
+                    release: availableUpdate,
+                    downloadState: updateDownloadState,
+                    action: onShowUpdateDetails,
+                    onCancelDownload: onCancelUpdateDownload
+                )
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
+            }
         }
         .onDisappear {
             spaceSwipeCompletionTask?.cancel()
@@ -223,7 +239,7 @@ struct SidebarView: View {
     }
 
     private var spacePageWidth: CGFloat {
-        model.sidebarMode == .pinned ? 300 : 280
+        width
     }
 
     private var spacePageOpacity: Double {
@@ -432,9 +448,105 @@ struct SidebarView: View {
 
 }
 
+private struct UpdateAvailableSidebarRow: View {
+    let release: AvailableRelease
+    let downloadState: BrowserUpdateDownloadState
+    let action: () -> Void
+    let onCancelDownload: () -> Void
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Button(action: action) {
+                HStack(spacing: 10) {
+                    Image(systemName: iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(BrowserLocalization.string("update_available_sidebar"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(statusText)
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.82))
+                        if case let .downloading(progress) = downloadState {
+                            if let progress {
+                                ProgressView(value: progress)
+                                    .progressViewStyle(.linear)
+                                    .tint(.white)
+                            } else {
+                                ProgressView()
+                                    .controlSize(.mini)
+                                    .tint(.white)
+                            }
+                        }
+                    }
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if case .downloading = downloadState {
+                Button(action: onCancelDownload) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.84))
+                        .frame(width: 28, height: 40)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(BrowserLocalization.string("cancel"))
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.72))
+                    .padding(.trailing, 4)
+            }
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12)
+        .frame(minHeight: 52)
+        .background(
+            Color.blue.gradient,
+            in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .accessibilityLabel(BrowserLocalization.string(
+            "update_available_message",
+            release.version.description
+        ))
+    }
+
+    private var iconName: String {
+        switch downloadState {
+        case .idle: "arrow.down.circle.fill"
+        case .downloading: "arrow.down.circle"
+        case .ready: "checkmark.circle.fill"
+        case .failed: "exclamationmark.triangle.fill"
+        }
+    }
+
+    private var statusText: String {
+        switch downloadState {
+        case .idle:
+            return release.version.description
+        case let .downloading(progress):
+            guard let progress else {
+                return BrowserLocalization.string("update_downloading_title")
+            }
+            return BrowserLocalization.string(
+                "update_downloading_percent",
+                Int((progress * 100).rounded())
+            )
+        case .ready:
+            return BrowserLocalization.string("update_ready_sidebar")
+        case .failed:
+            return BrowserLocalization.string("update_retry_sidebar")
+        }
+    }
+}
+
 private struct SpaceSwitcher: View {
     let model: BrowserWindowModel
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var editingSpaceID: TabSpaceID?
     @State private var draftName = ""
 
@@ -454,17 +566,20 @@ private struct SpaceSwitcher: View {
 
     @ViewBuilder
     private func spaceButton(_ space: TabSpace) -> some View {
+        let isReceivingBookmark = space.id == .bookmarks
+            && model.bookmarkSaveAnimation != nil
         let button = Button {
             withAnimation(.snappy(duration: 0.22)) {
                 model.selectSpace(space.id)
             }
         } label: {
             ZStack {
-                if space.id == model.selectedSpaceID {
+                if space.id == model.selectedSpaceID || isReceivingBookmark {
                     Image(systemName: space.symbolName)
                         .font(.system(size: 12, weight: .semibold))
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.primary.opacity(0.72))
+                        .scaleEffect(isReceivingBookmark ? 1.22 : 1)
                         .transition(.scale(scale: 0.65).combined(with: .opacity))
                 } else {
                     Circle()
@@ -477,7 +592,23 @@ private struct SpaceSwitcher: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(space.name)
+        .animation(
+            reduceMotion ? nil : .snappy(duration: 0.24, extraBounce: 0.16),
+            value: model.bookmarkSaveAnimation?.id
+        )
+        .background {
+            if space.id == .bookmarks {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: BookmarkSpaceFramePreferenceKey.self,
+                        value: proxy.frame(in: .global)
+                    )
+                }
+            }
+        }
+        .help(space.id == .bookmarks
+            ? BrowserLocalization.string("bookmarks_space_help")
+            : space.name)
         .accessibilityLabel(space.name)
         .contextMenu {
             if model.selectedTabCount > 0, space.id != model.selectedSpaceID {
@@ -490,20 +621,22 @@ private struct SpaceSwitcher: View {
                 let id = model.createSpace()
                 beginEditing(id)
             }
-            Divider()
-            Button(BrowserLocalization.string("rename")) {
-                beginEditing(space.id)
-            }
-            Menu(BrowserLocalization.string("space_icon")) {
-                ForEach(SpaceSymbolOption.popular) { option in
-                    Button {
-                        model.setSpaceSymbol(option.symbolName, for: space.id)
-                    } label: {
-                        Label(option.title, systemImage: option.symbolName)
+            if space.id != .bookmarks {
+                Divider()
+                Button(BrowserLocalization.string("rename")) {
+                    beginEditing(space.id)
+                }
+                Menu(BrowserLocalization.string("space_icon")) {
+                    ForEach(SpaceSymbolOption.popular) { option in
+                        Button {
+                            model.setSpaceSymbol(option.symbolName, for: space.id)
+                        } label: {
+                            Label(option.title, systemImage: option.symbolName)
+                        }
                     }
                 }
             }
-            if model.spaces.count > 1 {
+            if model.spaces.count > 1, space.id != .bookmarks {
                 Divider()
                 Button(BrowserLocalization.string("delete_space"), role: .destructive) {
                     model.deleteSpace(space.id)
@@ -538,6 +671,15 @@ private struct SpaceSwitcher: View {
             get: { editingSpaceID == id },
             set: { if !$0, editingSpaceID == id { editingSpaceID = nil } }
         )
+    }
+}
+
+struct BookmarkSpaceFramePreferenceKey: PreferenceKey {
+    static let defaultValue = CGRect.zero
+
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if next != .zero { value = next }
     }
 }
 
@@ -1161,6 +1303,15 @@ private struct PinnedTabCard: View {
                         .fill(cardFill)
 
                     TabFavicon(tab: tab, size: 24)
+                        .highPriorityGesture(
+                            SpatialTapGesture(coordinateSpace: .global).onEnded { event in
+                                model.saveTabAsBookmark(
+                                    tab.id,
+                                    sourcePoint: event.location
+                                )
+                            }
+                        )
+                        .help(BrowserLocalization.string("save_tab_to_bookmarks_help"))
                         .offset(y: isHovering && tab.domain != nil ? -7 : 0)
 
                     if tab.lifecycleState == .evicted {
@@ -1349,6 +1500,15 @@ private struct TabRow: View {
     private var rowLabel: some View {
         HStack(spacing: 9) {
             TabFavicon(tab: tab, size: 22)
+                .highPriorityGesture(
+                    SpatialTapGesture(coordinateSpace: .global).onEnded { event in
+                        model.saveTabAsBookmark(
+                            tab.id,
+                            sourcePoint: event.location
+                        )
+                    }
+                )
+                .help(BrowserLocalization.string("save_tab_to_bookmarks_help"))
             tabTitle
             Spacer(minLength: 4)
             if tab.lifecycleState == .evicted {

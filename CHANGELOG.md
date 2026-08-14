@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.2.9 — Bookmarks and Sidebar Refinements
+
+- Added bookmark support with a dedicated sidebar section and page controls.
+- Made the sidebar width adjustable and preserved the chosen width between launches.
+- Returned OAuth and other external authentication callbacks to their registered apps.
+- Updated the bundle version to `0.2.9` (`37`).
+
+## 0.2.8 — Background Update Downloads
+
+- Moved update-download progress and errors into the persistent blue sidebar entry.
+- Removed blocking download alerts from every open browser window.
+- Kept Finder reveal and manual installation instructions available after download without interrupting browsing.
+- Updated the bundle version to `0.2.8` (`36`).
+
+## 0.2.7 — Update Details Test Release
+
+- Published the update-details experience for beta verification from Point 0.2.6.
+- Shows a persistent blue update entry at the bottom of the sidebar and rendered release notes in its modal.
+- Updated the bundle version to `0.2.7` (`35`).
+
+## 0.2.6 — Update Details
+
+- Added a persistent blue update entry at the bottom of the sidebar.
+- Added a release-details modal with rendered GitHub Release notes and an update action.
+- Updated the bundle version to `0.2.6` (`34`).
+
 ## 0.2.5 — Immediate Manual Check
 
 - Made the explicit Settings update check query GitHub immediately instead of waiting for the daily background-check interval.

@@ -5,28 +5,70 @@ import BrowserCore
 import BrowserEngine
 import SwiftUI
 
+enum SidebarLayout {
+    static let defaultsKey = "BrowserSidebarWidth"
+    static let defaultWidth = 300.0
+    static let widthRange = 240.0...480.0
+    static let floatingInset: CGFloat = 10
+    static let resizeHandleWidth: CGFloat = 10
+
+    static func clamp(_ width: Double) -> Double {
+        min(max(width, widthRange.lowerBound), widthRange.upperBound)
+    }
+}
+
+public enum BrowserUpdateDownloadState: Equatable, Sendable {
+    case idle
+    case downloading(progress: Double?)
+    case ready
+    case failed
+}
+
 public struct BrowserWindowView: View {
     @Bindable private var model: BrowserWindowModel
     @Binding private var isOnboardingPresented: Bool
+    private let availableUpdate: AvailableRelease?
+    private let updateDownloadState: BrowserUpdateDownloadState
+    private let onInstallUpdate: (AvailableRelease) -> Void
+    private let onCancelUpdateDownload: () -> Void
+    private let onRevealDownloadedUpdate: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage(SidebarLayout.defaultsKey) private var storedSidebarWidth =
+        SidebarLayout.defaultWidth
+    @State private var liveSidebarWidth: Double?
     @State private var hideTask: Task<Void, Never>?
     @State private var dismissedDownloadIndicators: Set<UUID> = []
     @State private var isFullScreen = false
     @State private var hostWindow: NSWindow?
+    @State private var bookmarkTargetFrame = CGRect.zero
+    @State private var bookmarkFlightProgress: CGFloat = 0
+    @State private var animatingBookmarkID: UUID?
+    @State private var bookmarkAnimationTask: Task<Void, Never>?
+    @State private var isUpdateDetailsPresented = false
 
     public init(
         model: BrowserWindowModel,
-        isOnboardingPresented: Binding<Bool> = .constant(false)
+        isOnboardingPresented: Binding<Bool> = .constant(false),
+        availableUpdate: AvailableRelease? = nil,
+        updateDownloadState: BrowserUpdateDownloadState = .idle,
+        onInstallUpdate: @escaping (AvailableRelease) -> Void = { _ in },
+        onCancelUpdateDownload: @escaping () -> Void = {},
+        onRevealDownloadedUpdate: @escaping () -> Void = {}
     ) {
         self.model = model
         _isOnboardingPresented = isOnboardingPresented
+        self.availableUpdate = availableUpdate
+        self.updateDownloadState = updateDownloadState
+        self.onInstallUpdate = onInstallUpdate
+        self.onCancelUpdateDownload = onCancelUpdateDownload
+        self.onRevealDownloadedUpdate = onRevealDownloadedUpdate
     }
 
     public var body: some View {
         ZStack(alignment: .leading) {
-            WebSurface(model: model)
-                .padding(.leading, model.sidebarMode == .pinned ? 300 : 0)
+            WebSurface(model: model, sidebarWidth: sidebarWidth)
+                .padding(.leading, model.sidebarMode == .pinned ? sidebarWidth : 0)
                 .padding(.trailing, aiChatPanelWidth)
                 .clipShape(
                     LeadingRoundedRectangle(
@@ -51,8 +93,41 @@ public struct BrowserWindowView: View {
                 edgeSensor
             }
 
-            SidebarView(model: model, isFullScreen: isFullScreen)
-                .frame(width: model.sidebarMode == .pinned ? 300 : 280)
+            SidebarView(
+                model: model,
+                isFullScreen: isFullScreen,
+                width: sidebarWidth,
+                availableUpdate: availableUpdate,
+                updateDownloadState: updateDownloadState,
+                onCancelUpdateDownload: onCancelUpdateDownload
+            ) {
+                isUpdateDetailsPresented = true
+            }
+                .frame(width: sidebarWidth)
+                .overlay(alignment: .trailing) {
+                    SidebarResizeHandle(
+                        width: sidebarWidth
+                    ) { proposedWidth in
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            liveSidebarWidth = SidebarLayout.clamp(Double(proposedWidth))
+                        }
+                    } onCommit: { proposedWidth in
+                        let resolvedWidth = SidebarLayout.clamp(Double(proposedWidth))
+                        storedSidebarWidth = resolvedWidth
+                        liveSidebarWidth = nil
+                    }
+                    .offset(x: SidebarLayout.resizeHandleWidth / 2)
+                }
+                .padding(
+                    .leading,
+                    model.sidebarMode == .pinned ? 0 : SidebarLayout.floatingInset
+                )
+                .padding(
+                    .vertical,
+                    model.sidebarMode == .pinned ? 0 : SidebarLayout.floatingInset
+                )
                 .ignoresSafeArea()
                 .offset(x: sidebarOffset)
                 .opacity(model.isSidebarVisible ? 1 : 0)
@@ -68,7 +143,7 @@ public struct BrowserWindowView: View {
                 }
 
             if model.previewTab != nil {
-                WebPreviewOverlay(model: model)
+                WebPreviewOverlay(model: model, sidebarWidth: sidebarWidth)
                     .ignoresSafeArea()
                     .zIndex(30)
             }
@@ -85,7 +160,12 @@ public struct BrowserWindowView: View {
                     dismissedDownloadIndicators.insert(download.id)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(.leading, model.sidebarMode == .pinned ? 314 : 14)
+                .padding(
+                    .leading,
+                    model.sidebarMode == .pinned
+                        ? sidebarWidth + 14
+                        : SidebarLayout.floatingInset + 4
+                )
                 .padding(.top, 14)
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
                 .zIndex(4)
@@ -179,6 +259,48 @@ public struct BrowserWindowView: View {
                     .zIndex(15)
             }
 
+            if let animation = model.bookmarkSaveAnimation,
+               bookmarkTargetFrame != .zero {
+                GeometryReader { proxy in
+                    BookmarkFlightView(
+                        animation: animation,
+                        source: animation.sourcePoint ?? CGPoint(
+                            x: proxy.size.width * 0.68,
+                            y: proxy.size.height * 0.46
+                        ),
+                        destination: CGPoint(
+                            x: bookmarkTargetFrame.midX,
+                            y: bookmarkTargetFrame.midY
+                        ),
+                        progress: bookmarkFlightProgress
+                    )
+                }
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .zIndex(55)
+            }
+
+            if let animation = model.bookmarkSaveAnimation,
+               bookmarkTargetFrame != .zero {
+                GeometryReader { proxy in
+                    BookmarkFlightView(
+                        animation: animation,
+                        source: animation.sourcePoint ?? CGPoint(
+                            x: proxy.size.width * 0.68,
+                            y: proxy.size.height * 0.46
+                        ),
+                        destination: CGPoint(
+                            x: bookmarkTargetFrame.midX,
+                            y: bookmarkTargetFrame.midY
+                        ),
+                        progress: bookmarkFlightProgress
+                    )
+                }
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .zIndex(55)
+            }
+
             if isOnboardingPresented {
                 OnboardingOverlay {
                     isOnboardingPresented = false
@@ -186,7 +308,28 @@ public struct BrowserWindowView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
                 .transition(.opacity.combined(with: .scale(scale: 0.98)))
-                .zIndex(60)
+                    .zIndex(60)
+            }
+
+            if let availableUpdate, isUpdateDetailsPresented {
+                Color.black.opacity(0.18)
+                    .ignoresSafeArea()
+                    .onTapGesture { isUpdateDetailsPresented = false }
+                    .zIndex(70)
+
+                ReleaseUpdateOverlay(
+                    release: availableUpdate,
+                    downloadState: updateDownloadState,
+                    onUpdate: {
+                        onInstallUpdate(availableUpdate)
+                        isUpdateDetailsPresented = false
+                    },
+                    onCancelDownload: onCancelUpdateDownload,
+                    onRevealDownloadedUpdate: onRevealDownloadedUpdate,
+                    onClose: { isUpdateDetailsPresented = false }
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .zIndex(71)
             }
 
         }
@@ -217,6 +360,13 @@ public struct BrowserWindowView: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: model.isClearBrowsingDataPresented)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: model.toastMessage)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.24), value: isOnboardingPresented)
+        .onPreferenceChange(BookmarkSpaceFramePreferenceKey.self) { frame in
+            bookmarkTargetFrame = frame
+            startBookmarkAnimationIfReady()
+        }
+        .onChange(of: model.bookmarkSaveAnimation?.id) {
+            startBookmarkAnimationIfReady()
+        }
         .onChange(of: scenePhase) { _, phase in
             model.setApplicationActive(phase == .active)
         }
@@ -231,6 +381,10 @@ public struct BrowserWindowView: View {
             hostWindow?.makeKeyAndOrderFront(nil)
         }
         .onDisappear {
+            bookmarkAnimationTask?.cancel()
+            if let id = model.bookmarkSaveAnimation?.id {
+                model.completeBookmarkSaveAnimation(id)
+            }
             model.stopLifecycleMonitoring()
         }
     }
@@ -241,6 +395,10 @@ public struct BrowserWindowView: View {
         model.isAIChatPanelVisible ? CGFloat(AIChatSettings.shared.panelWidth) : 0
     }
 
+    private var sidebarWidth: CGFloat {
+        CGFloat(SidebarLayout.clamp(liveSidebarWidth ?? storedSidebarWidth))
+    }
+
     private var indicatorDownload: DownloadItem? {
         model.downloadManager.items.first { item in
             item.state.isActive && !dismissedDownloadIndicators.contains(item.id)
@@ -249,7 +407,9 @@ public struct BrowserWindowView: View {
 
     private var sidebarOffset: CGFloat {
         guard !reduceMotion else { return 0 }
-        return model.isSidebarVisible ? 0 : -300
+        return model.isSidebarVisible
+            ? 0
+            : -(sidebarWidth + SidebarLayout.floatingInset * 2)
     }
 
     private var edgeSensor: some View {
@@ -271,6 +431,292 @@ public struct BrowserWindowView: View {
             guard !Task.isCancelled else { return }
             model.hideAutoHideSidebar()
         }
+    }
+
+    private func startBookmarkAnimationIfReady() {
+        guard let animation = model.bookmarkSaveAnimation,
+              bookmarkTargetFrame != .zero,
+              animatingBookmarkID != animation.id
+        else { return }
+
+        bookmarkAnimationTask?.cancel()
+        animatingBookmarkID = animation.id
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            bookmarkFlightProgress = 0
+        }
+
+        bookmarkAnimationTask = Task { @MainActor in
+            await Task.yield()
+            if reduceMotion {
+                bookmarkFlightProgress = 1
+            } else {
+                withAnimation(.timingCurve(0.22, 0.72, 0.18, 1, duration: 0.72)) {
+                    bookmarkFlightProgress = 1
+                }
+            }
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 240 : 780))
+            guard !Task.isCancelled else { return }
+            model.completeBookmarkSaveAnimation(animation.id)
+            animatingBookmarkID = nil
+        }
+    }
+}
+
+private struct SidebarResizeHandle: View {
+    let width: CGFloat
+    let onResize: (CGFloat) -> Void
+    let onCommit: (CGFloat) -> Void
+
+    @State private var widthAtDragStart: CGFloat?
+    @State private var isHovering = false
+
+    var body: some View {
+        Rectangle()
+        .fill(.clear)
+        .frame(width: SidebarLayout.resizeHandleWidth)
+        .frame(maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onContinuousHover { phase in
+            switch phase {
+            case .active:
+                isHovering = true
+                NSCursor.resizeLeftRight.set()
+            case .ended:
+                isHovering = false
+                NSCursor.arrow.set()
+            }
+        }
+        .onDisappear {
+            if isHovering { NSCursor.arrow.set() }
+        }
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .global)
+                .onChanged { value in
+                    NSCursor.resizeLeftRight.set()
+                    let start = widthAtDragStart ?? width
+                    widthAtDragStart = start
+                    onResize(start + value.translation.width)
+                }
+                .onEnded { value in
+                    let start = widthAtDragStart ?? width
+                    onCommit(start + value.translation.width)
+                    widthAtDragStart = nil
+                    if isHovering {
+                        NSCursor.resizeLeftRight.set()
+                    } else {
+                        NSCursor.arrow.set()
+                    }
+                }
+        )
+        .accessibilityLabel(BrowserLocalization.string("resize_sidebar"))
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment:
+                onCommit(width + 20)
+            case .decrement:
+                onCommit(width - 20)
+            @unknown default:
+                break
+            }
+        }
+    }
+}
+
+private struct BookmarkFlightView: View {
+    let animation: BookmarkSaveAnimation
+    let source: CGPoint
+    let destination: CGPoint
+    let progress: CGFloat
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(.regularMaterial)
+            Circle()
+                .stroke(Color.accentColor.opacity(0.38), lineWidth: 1)
+
+            if let favicon = animation.favicon {
+                Image(nsImage: favicon)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .padding(5)
+            } else {
+                Image(systemName: "bookmark.fill")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+            }
+        }
+        .frame(width: 30, height: 30)
+        .shadow(color: .black.opacity(0.2), radius: 9, y: 4)
+        .scaleEffect(1 - progress * 0.38)
+        .opacity(progress < 0.9 ? 1 : max(0, (1 - progress) * 10))
+        .position(flightPosition)
+        .accessibilityHidden(true)
+    }
+
+    private var flightPosition: CGPoint {
+        let x = source.x + (destination.x - source.x) * progress
+        let linearY = source.y + (destination.y - source.y) * progress
+        let distance = hypot(destination.x - source.x, destination.y - source.y)
+        let arcHeight = min(72, max(28, distance * 0.16))
+        return CGPoint(
+            x: x,
+            y: linearY - sin(.pi * progress) * arcHeight
+        )
+    }
+}
+
+private struct ReleaseUpdateOverlay: View {
+    let release: AvailableRelease
+    let downloadState: BrowserUpdateDownloadState
+    let onUpdate: () -> Void
+    let onCancelDownload: () -> Void
+    let onRevealDownloadedUpdate: () -> Void
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.down.circle.fill")
+                    .font(.system(size: 25, weight: .semibold))
+                    .foregroundStyle(.blue)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(BrowserLocalization.string(
+                        "update_details_title",
+                        release.version.description
+                    ))
+                    .font(.headline)
+                    Text(BrowserLocalization.string("release_notes"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(BrowserLocalization.string("close"))
+            }
+            .padding(.horizontal, 20)
+            .frame(height: 64)
+
+            Divider()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    downloadStatusCard
+
+                    if release.releaseNotes.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty {
+                        ContentUnavailableView(
+                            BrowserLocalization.string("release_notes"),
+                            systemImage: "note.text",
+                            description: Text(BrowserLocalization.string(
+                                "release_notes_unavailable"
+                            ))
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(32)
+                    } else {
+                        ChatMarkdownView(text: release.releaseNotes)
+                    }
+                }
+                .padding(20)
+            }
+            .frame(maxHeight: .infinity)
+
+            Divider()
+
+            HStack {
+                Button(BrowserLocalization.string("later"), action: onClose)
+                Spacer()
+                switch downloadState {
+                case .idle, .failed:
+                    Button(BrowserLocalization.string("update"), action: onUpdate)
+                        .buttonStyle(.borderedProminent)
+                case .downloading:
+                    Button(
+                        BrowserLocalization.string("cancel"),
+                        role: .destructive,
+                        action: onCancelDownload
+                    )
+                case .ready:
+                    Button(
+                        BrowserLocalization.string("update_show_in_finder"),
+                        action: onRevealDownloadedUpdate
+                    )
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding(.horizontal, 20)
+            .frame(height: 62)
+        }
+        .frame(width: 500, height: 470)
+        .browserGlassSurface(cornerRadius: 20)
+        .shadow(color: .black.opacity(0.2), radius: 30, y: 16)
+        .onExitCommand(perform: onClose)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(BrowserLocalization.string(
+            "update_details_title",
+            release.version.description
+        ))
+    }
+
+    @ViewBuilder
+    private var downloadStatusCard: some View {
+        switch downloadState {
+        case .idle:
+            EmptyView()
+        case let .downloading(progress):
+            VStack(alignment: .leading, spacing: 8) {
+                Text(downloadProgressText(progress))
+                    .font(.subheadline.weight(.semibold))
+                if let progress {
+                    ProgressView(value: progress)
+                } else {
+                    ProgressView()
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        case .ready:
+            Label {
+                Text(BrowserLocalization.string("update_ready_instructions"))
+                    .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            }
+            .font(.subheadline)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+        case .failed:
+            Label(
+                BrowserLocalization.string("update_download_failed"),
+                systemImage: "exclamationmark.triangle.fill"
+            )
+            .font(.subheadline)
+            .foregroundStyle(.red)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func downloadProgressText(_ progress: Double?) -> String {
+        guard let progress else {
+            return BrowserLocalization.string("update_downloading_title")
+        }
+        return BrowserLocalization.string(
+            "update_downloading_percent",
+            Int((progress * 100).rounded())
+        )
     }
 }
 
@@ -453,6 +899,7 @@ private struct DownloadProgressBubble: View {
 
 private struct WebSurface: View {
     let model: BrowserWindowModel
+    let sidebarWidth: CGFloat
 
     var body: some View {
         ZStack {
@@ -519,7 +966,9 @@ private struct WebSurface: View {
     }
 
     private var blockedWebInteractionWidth: CGFloat {
-        model.sidebarMode == .autoHide && model.isSidebarVisible ? 300 : 0
+        model.sidebarMode == .autoHide && model.isSidebarVisible
+            ? sidebarWidth + SidebarLayout.floatingInset
+            : 0
     }
 }
 
@@ -676,11 +1125,12 @@ private struct SplitDropZone: View {
 
 private struct WebPreviewOverlay: View {
     let model: BrowserWindowModel
+    let sidebarWidth: CGFloat
 
     var body: some View {
         GeometryReader { geometry in
-            let sidebarWidth = model.sidebarMode == .pinned ? 300.0 : 0.0
-            let availableWidth = max(0, geometry.size.width - sidebarWidth)
+            let pinnedSidebarWidth = model.sidebarMode == .pinned ? sidebarWidth : 0
+            let availableWidth = max(0, geometry.size.width - pinnedSidebarWidth)
             let plateWidth = max(0, availableWidth - 48)
             let plateHeight = max(0, geometry.size.height - 48)
             let previewWidth = max(0, plateWidth - 16)
