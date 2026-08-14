@@ -76,6 +76,7 @@ private final class BrowserRuntime {
         browsingHistoryRepository: browsingHistoryRepository
     )
     private var privateDownloadManagers: [WeakDownloadManager] = []
+    private var privateWindowModels: [WeakBrowserWindowModel] = []
     private var standardWindowModels: [WeakBrowserWindowModel] = []
     private var hasClaimedOnboarding = false
 
@@ -98,18 +99,19 @@ private final class BrowserRuntime {
             privateDownloadManagers.append(
                 WeakDownloadManager(privateDownloadManager)
             )
-            return register(
-                BrowserWindowModel(
-                    repository: InMemorySessionRepository(),
-                    sitePermissionRepository: InMemorySitePermissionRepository(),
-                    browsingHistoryRepository: InMemoryBrowsingHistoryRepository(),
-                    bookmarkRepository: InMemoryBookmarkRepository(),
-                    downloadManager: privateDownloadManager,
-                    faviconRepository: FaviconRepository(persistsToDisk: false),
-                    isPrivate: true,
-                    websiteDataStore: .nonPersistent()
-                )
+            let model = BrowserWindowModel(
+                repository: InMemorySessionRepository(),
+                sitePermissionRepository: InMemorySitePermissionRepository(),
+                browsingHistoryRepository: InMemoryBrowsingHistoryRepository(),
+                bookmarkRepository: InMemoryBookmarkRepository(),
+                downloadManager: privateDownloadManager,
+                faviconRepository: FaviconRepository(persistsToDisk: false),
+                isPrivate: true,
+                websiteDataStore: .nonPersistent()
             )
+            privateWindowModels.removeAll { $0.value == nil }
+            privateWindowModels.append(WeakBrowserWindowModel(model))
+            return model
         }
 
         standardWindowModels.removeAll { $0.value == nil }
@@ -135,6 +137,7 @@ private final class BrowserRuntime {
             repository: sessionRepository,
             sitePermissionRepository: FileSitePermissionRepository(),
             browsingHistoryRepository: browsingHistoryRepository,
+            bookmarkRepository: bookmarkRepository,
             downloadManager: downloadManager,
             isPrivate: false,
             websiteDataStore: .default()
@@ -170,9 +173,11 @@ private final class BrowserRuntime {
 
     func prepareForTermination() async {
         privateDownloadManagers.removeAll { $0.value == nil }
+        privateWindowModels.removeAll { $0.value == nil }
         standardWindowModels.removeAll { $0.value == nil }
 
-        for model in standardWindowModels.compactMap(\.value) {
+        let windowModels = privateWindowModels + standardWindowModels
+        for model in windowModels.compactMap(\.value) {
             await model.closeAllTabsForTermination()
         }
 

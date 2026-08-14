@@ -712,21 +712,20 @@ private struct SpaceEditor: View {
         .frame(width: 248)
     }
 
-    @ViewBuilder
     private func symbolButton(_ option: SpaceSymbolOption) -> some View {
-        let button = Button {
+        Button {
             model.setSpaceSymbol(option.symbolName, for: space.id)
         } label: {
             Image(systemName: option.symbolName)
+                .foregroundStyle(
+                    space.symbolName == option.symbolName
+                        ? Color.accentColor
+                        : Color.primary
+                )
                 .frame(width: 28, height: 28)
         }
+        .buttonStyle(.borderless)
         .help(option.title)
-
-        if space.symbolName == option.symbolName {
-            button.buttonStyle(.glassProminent)
-        } else {
-            button.buttonStyle(.glass)
-        }
     }
 }
 

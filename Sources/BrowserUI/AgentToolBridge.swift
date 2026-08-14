@@ -458,7 +458,7 @@ extension BrowserAIToolBridge {
     // MARK: - Tabs
 
     private func runSwitchTab(_ arguments: AIJSONValue) throws -> AIToolOutput {
-        guard let model else { throw AIToolBridgeError.windowClosed }
+        guard model != nil else { throw AIToolBridgeError.windowClosed }
         let tab = try resolveTab(arguments["tab_id"]?.stringValue)
         agentTabID = tab.id
         agentActivity?.beginControl(of: tab.id)

@@ -1145,6 +1145,23 @@
         }
       }
     },
+    "bookmark_saved" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to Bookmarks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранено в закладки"
+          }
+        }
+      }
+    },
     "bookmark_tab" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1207,6 +1224,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Favicons are loaded only from the local cache"
+          }
+        }
+      }
+    },
+    "bookmarks_space" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmarks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закладки"
+          }
+        }
+      }
+    },
+    "bookmarks_space_help" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bookmarks. Click a tab’s site icon or choose “Save to Bookmarks” from a link’s menu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закладки. Нажмите на значок сайта во вкладке или выберите «Сохранить в закладки» в меню ссылки."
           }
         }
       }
@@ -1608,6 +1659,23 @@
         }
       }
     },
+    "copy_link" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Link"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копировать ссылку"
+          }
+        }
+      }
+    },
     "copy_page_address" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1647,70 +1715,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Could Not Change Default Browser"
-          }
-        }
-      }
-    },
-    "bookmark_saved": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved to Bookmarks"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сохранено в закладки"
-          }
-        }
-      }
-    },
-    "bookmarks_space": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bookmarks"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Закладки"
-          }
-        }
-      }
-    },
-    "bookmarks_space_help": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bookmarks. Click a tab’s site icon or choose “Save to Bookmarks” from a link’s menu."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Закладки. Нажмите на значок сайта во вкладке или выберите «Сохранить в закладки» в меню ссылки."
-          }
-        }
-      }
-    },
-    "browser_memory_usage": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Browser memory usage"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Память, используемая браузером"
           }
         }
       }
@@ -1858,6 +1862,23 @@
         }
       }
     },
+    "done" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
     "dont_allow" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1909,6 +1930,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloading…"
+          }
+        }
+      }
+    },
+    "download_linked_file" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Linked File"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачать файл по ссылке"
           }
         }
       }
@@ -2931,6 +2969,40 @@
         }
       }
     },
+    "open_link" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Link"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть ссылку"
+          }
+        }
+      }
+    },
+    "open_link_in_new_window" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Link in New Window"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть ссылку в новом окне"
+          }
+        }
+      }
+    },
     "open_tab" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3206,6 +3278,40 @@
         }
       }
     },
+    "release_notes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release Notes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заметки к релизу"
+          }
+        }
+      }
+    },
+    "release_notes_unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No release notes were provided for this version."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для этой версии заметки к релизу не указаны."
+          }
+        }
+      }
+    },
     "reload" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3279,6 +3385,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reopen Closed Tab"
+          }
+        }
+      }
+    },
+    "resize_sidebar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resize the sidebar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить ширину боковой панели"
           }
         }
       }
@@ -3360,6 +3483,23 @@
         }
       }
     },
+    "save_link_to_bookmarks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save to Bookmarks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить в закладки"
+          }
+        }
+      }
+    },
     "save_site_decision" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3367,6 +3507,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save Decision for This Site"
+          }
+        }
+      }
+    },
+    "save_tab_to_bookmarks_help" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click the site icon to save this tab to Bookmarks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на значок сайта, чтобы сохранить вкладку в закладки"
           }
         }
       }
@@ -3486,6 +3643,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Could Not Restore Session: %@"
+          }
+        }
+      }
+    },
+    "share_link" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться…"
           }
         }
       }
@@ -3622,34 +3796,36 @@
         }
       }
     },
-    "resize_sidebar": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resize the sidebar"
+    "space_icon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space Icon"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Изменить ширину боковой панели"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Значок пространства"
           }
         }
       }
     },
-    "restoring_unloaded_tab": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restoring tab"
+    "space_name_placeholder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space Name"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вкладка восстанавливается"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название пространства"
           }
         }
       }
@@ -3797,6 +3973,23 @@
         }
       }
     },
+    "update_available_sidebar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Available"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступно обновление"
+          }
+        }
+      }
+    },
     "update_available_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3899,6 +4092,23 @@
         }
       }
     },
+    "update_details_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point %@ is available"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступен Point %@"
+          }
+        }
+      }
+    },
     "update_download_failed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3950,6 +4160,23 @@
         }
       }
     },
+    "update_downloading_percent" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading… %d%%"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загрузка… %d%%"
+          }
+        }
+      }
+    },
     "update_downloading_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3984,6 +4211,23 @@
         }
       }
     },
+    "update_ready_sidebar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to install"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово к установке"
+          }
+        }
+      }
+    },
     "update_ready_title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3997,6 +4241,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Готово к установке"
+          }
+        }
+      }
+    },
+    "update_retry_sidebar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download failed · Try again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка загрузки · Повторить"
+          }
+        }
+      }
+    },
+    "update_show_in_finder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show in Finder"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать в Finder"
           }
         }
       }
@@ -4105,582 +4383,14 @@
             "value" : "Work"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вкладки"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкладки"
           }
         }
-      }
-    },
-    "team": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Team"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Команда"
-          }
-        }
-      }
-    },
-    "toggle_sidebar": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show or Hide Sidebar"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показать или скрыть sidebar"
-          }
-        }
-      }
-    },
-    "travel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Travel"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Путешествия"
-          }
-        }
-      }
-    },
-    "unpin": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unpin"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открепить"
-          }
-        }
-      }
-    },
-    "unsupported_scheme": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The %@ scheme is not supported"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Схема %@ не поддерживается"
-          }
-        }
-      }
-    },
-    "username": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Username"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Имя пользователя"
-          }
-        }
-      }
-    },
-    "video": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Видео"
-          }
-        }
-      }
-    },
-    "web_cache": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Web Cache"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Web-кэш"
-          }
-        }
-      }
-    },
-    "delete_space": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete Space"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Удалить пространство"
-          }
-        }
-      }
-    },
-    "done": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Done"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готово"
-          }
-        }
-      }
-    },
-    "move_selected_to_space": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Move Selected Tabs Here"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Переместить выбранные вкладки сюда"
-          }
-        }
-      }
-    },
-    "move_to_space": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Move to Space"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Переместить в пространство"
-          }
-        }
-      }
-    },
-    "new_space": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New Space"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новое пространство"
-          }
-        }
-      }
-    },
-    "space_default_name": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Space %d"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пространство %d"
-          }
-        }
-      }
-    },
-    "copy_link": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copy Link"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Копировать ссылку"
-          }
-        }
-      }
-    },
-    "download_linked_file": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Download Linked File"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скачать файл по ссылке"
-          }
-        }
-      }
-    },
-    "open_link": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Link"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открыть ссылку"
-          }
-        }
-      }
-    },
-    "open_link_in_new_window": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Link in New Window"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открыть ссылку в новом окне"
-          }
-        }
-      }
-    },
-    "save_link_to_bookmarks": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save to Bookmarks"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сохранить в закладки"
-          }
-        }
-      }
-    },
-    "share_link": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Share…"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поделиться…"
-          }
-        }
-      }
-    },
-    "save_tab_to_bookmarks_help": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Click the site icon to save this tab to Bookmarks"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нажмите на значок сайта, чтобы сохранить вкладку в закладки"
-          }
-        }
-      }
-    },
-    "space_icon": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Space Icon"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Значок пространства"
-          }
-        }
-      }
-    },
-    "space_name_placeholder": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Space Name"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Название пространства"
-          }
-        }
-      }
-    },
-    "web_page": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Web Page"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Веб-страница"
-          }
-        }
-      }
-    },
-    "work": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Work"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Работа"
-          }
-        }
-      }
-    },
-    "later": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Later" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Позже" } }
-      }
-    },
-    "check_for_updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Check for Updates" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверить обновления" } }
-      }
-    },
-    "checking_for_updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Checking for Updates…" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка обновлений…" } }
-      }
-    },
-    "update": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Обновить" } }
-      }
-    },
-    "updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Updates" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Обновления" } }
-      }
-    },
-    "updates_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point checks GitHub Releases no more than once every 24 hours while it is running." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point проверяет GitHub Releases не чаще одного раза в 24 часа во время работы." } }
-      }
-    },
-    "update_check_available": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "An update is available." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление." } }
-      }
-    },
-    "update_check_failed": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Could not check for updates. Try again later." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось проверить обновления. Повторите попытку позже." } }
-      }
-    },
-    "update_check_not_configured": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update checks are not configured for this build." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка обновлений не настроена для этой сборки." } }
-      }
-    },
-    "update_check_recently": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Checked recently. Point checks once every 24 hours." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка уже выполнялась недавно. Point проверяет обновления раз в 24 часа." } }
-      }
-    },
-    "update_check_up_to_date": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "You’re up to date." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Установлена актуальная версия." } }
-      }
-    },
-    "update_available_message": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point %@ is ready to download." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point %@ готов к загрузке." } }
-      }
-    },
-    "update_available_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update Available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление" } }
-      }
-    },
-    "update_download_failed": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "The update could not be downloaded. Check your connection and try again later." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось загрузить обновление. Проверьте подключение и повторите попытку позже." } }
-      }
-    },
-    "update_download_failed_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Download Failed" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ошибка загрузки" } }
-      }
-    },
-    "update_downloading_message": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point is downloading the disk image. You can cancel at any time." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point загружает образ диска. Загрузку можно отменить в любой момент." } }
-      }
-    },
-    "update_downloading_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Downloading Update…" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка обновления…" } }
-      }
-    },
-    "update_downloading_percent": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Downloading… %d%%" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка… %d%%" } }
-      }
-    },
-    "update_details_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point %@ is available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступен Point %@" } }
-      }
-    },
-    "update_available_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update Available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление" } }
-      }
-    },
-    "update_ready_instructions": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "The disk image is open in Finder. Quit Point, open the downloaded DMG, drag Point into Applications, replace the old copy, then reopen Point." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Образ диска открыт в Finder. Закройте Point, откройте загруженный DMG, перетащите Point в «Программы», замените старую копию и снова откройте Point." } }
-      }
-    },
-    "update_ready_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ready to Install" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Готово к установке" } }
-      }
-    },
-    "update_ready_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ready to install" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Готово к установке" } }
-      }
-    },
-    "update_retry_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Download failed · Try again" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ошибка загрузки · Повторить" } }
-      }
-    },
-    "update_show_in_finder": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Show in Finder" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Показать в Finder" } }
-      }
-    },
-    "release_notes": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Release Notes" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Заметки к релизу" } }
-      }
-    },
-    "release_notes_unavailable": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "No release notes were provided for this version." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Для этой версии заметки к релизу не указаны." } }
-      }
-    },
-    "whats_new": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "What’s New" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Что нового" } }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

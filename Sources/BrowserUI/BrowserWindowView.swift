@@ -70,11 +70,6 @@ public struct BrowserWindowView: View {
             WebSurface(model: model, sidebarWidth: sidebarWidth)
                 .padding(.leading, model.sidebarMode == .pinned ? sidebarWidth : 0)
                 .padding(.trailing, aiChatPanelWidth)
-                .clipShape(
-                    LeadingRoundedRectangle(
-                        radius: model.sidebarMode == .pinned ? 18 : 0
-                    )
-                )
                 .ignoresSafeArea()
 
             if model.isAIChatPanelVisible {
@@ -120,14 +115,6 @@ public struct BrowserWindowView: View {
                     }
                     .offset(x: SidebarLayout.resizeHandleWidth / 2)
                 }
-                .padding(
-                    .leading,
-                    model.sidebarMode == .pinned ? 0 : SidebarLayout.floatingInset
-                )
-                .padding(
-                    .vertical,
-                    model.sidebarMode == .pinned ? 0 : SidebarLayout.floatingInset
-                )
                 .ignoresSafeArea()
                 .offset(x: sidebarOffset)
                 .opacity(model.isSidebarVisible ? 1 : 0)
@@ -717,30 +704,6 @@ private struct ReleaseUpdateOverlay: View {
             "update_downloading_percent",
             Int((progress * 100).rounded())
         )
-    }
-}
-
-private struct LeadingRoundedRectangle: Shape {
-    let radius: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let cornerRadius = min(radius, rect.width / 2, rect.height / 2)
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX + cornerRadius, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX + cornerRadius, y: rect.maxY))
-        path.addQuadCurve(
-            to: CGPoint(x: rect.minX, y: rect.maxY - cornerRadius),
-            control: CGPoint(x: rect.minX, y: rect.maxY)
-        )
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + cornerRadius))
-        path.addQuadCurve(
-            to: CGPoint(x: rect.minX + cornerRadius, y: rect.minY),
-            control: CGPoint(x: rect.minX, y: rect.minY)
-        )
-        path.closeSubpath()
-        return path
     }
 }
 
