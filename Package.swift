@@ -63,7 +63,7 @@ let package = Package(
         ),
         .testTarget(
             name: "BrowserUITests",
-            dependencies: ["BrowserUI"]
+            dependencies: ["BrowserCore", "BrowserUI", "BrowserPersistence"]
         ),
         .testTarget(
             name: "BrowserAutomationTests",

@@ -73,7 +73,10 @@ public struct BrowserWindowView: View {
                 .ignoresSafeArea()
 
             if model.isAIChatPanelVisible {
-                AIChatPanelView(model: model)
+                AIChatPanelView(
+                    model: model,
+                    isFullScreen: isFullScreen
+                )
                     .frame(
                         maxWidth: .infinity,
                         maxHeight: .infinity,
@@ -319,6 +322,26 @@ public struct BrowserWindowView: View {
                 .zIndex(71)
             }
 
+            if model.presentedSettingsSection != nil {
+                Color.black.opacity(0.22)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture { model.dismissSettings() }
+                    .zIndex(80)
+
+                GeometryReader { proxy in
+                    BrowserSettingsView(model: model)
+                        .frame(
+                            width: min(640, max(520, proxy.size.width - 40)),
+                            height: min(500, max(420, proxy.size.height - 40))
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .ignoresSafeArea()
+                .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                .zIndex(81)
+            }
+
         }
         .frame(minWidth: 760, minHeight: 520)
         .background(
@@ -347,6 +370,10 @@ public struct BrowserWindowView: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: model.isClearBrowsingDataPresented)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: model.toastMessage)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.24), value: isOnboardingPresented)
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: 0.18),
+            value: model.presentedSettingsSection
+        )
         .onPreferenceChange(BookmarkSpaceFramePreferenceKey.self) { frame in
             bookmarkTargetFrame = frame
             startBookmarkAnimationIfReady()
@@ -404,7 +431,10 @@ public struct BrowserWindowView: View {
             hideTask?.cancel()
             model.showAutoHideSidebar()
         }
-            .frame(width: 36)
+            // In full screen the reveal target must be the physical screen edge.
+            // A wider invisible hover strip makes the sidebar appear while the
+            // pointer is merely near the edge of the page.
+            .frame(width: isFullScreen ? 1 : 36)
             .frame(maxHeight: .infinity)
             .onTapGesture {
                 model.showAutoHideSidebar()

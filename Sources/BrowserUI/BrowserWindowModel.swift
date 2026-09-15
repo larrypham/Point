@@ -288,6 +288,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public private(set) var isLoadingBookmarks = false
     public private(set) var bookmarkError: String?
     public var isClearBrowsingDataPresented = false
+    public var presentedSettingsSection: BrowserSettingsSection?
     public var selectedBrowsingDataCategories = Set(BrowsingDataCategory.allCases)
     public private(set) var isClearingBrowsingData = false
     public var clearBrowsingDataStatus: String?
@@ -353,6 +354,9 @@ public final class BrowserWindowModel: WebEngineEventSink {
     @ObservationIgnored private var browsingHistoryManagementTask: Task<Void, Never>?
     @ObservationIgnored private var bookmarkManagementTask: Task<Void, Never>?
     @ObservationIgnored private var clearBrowsingDataTask: Task<Void, Never>?
+    /// Most-recently-used tab order. This is intentionally independent from
+    /// sidebar positions so closing a tab returns to browsing context.
+    @ObservationIgnored private var tabActivationHistory: [TabID] = []
 
     public init(
         repository: any SessionRepository,
@@ -833,6 +837,18 @@ public final class BrowserWindowModel: WebEngineEventSink {
         clearBrowsingDataTask = nil
     }
 
+    public func presentSettings(_ section: BrowserSettingsSection = .general) {
+        dismissOmnibox()
+        dismissSitePermissions()
+        dismissBrowsingHistory()
+        isClearBrowsingDataPresented = false
+        presentedSettingsSection = section
+    }
+
+    public func dismissSettings() {
+        presentedSettingsSection = nil
+    }
+
     public func clearSelectedBrowsingData() {
         guard !selectedBrowsingDataCategories.isEmpty,
               !isClearingBrowsingData
@@ -1134,6 +1150,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
         let wasSelected = selectedTabID == id
         rememberClosedTab(tabs[index])
         tabs.remove(at: index)
+        tabActivationHistory.removeAll { $0 == id }
         selectedTabIDs.remove(id)
         if selectionAnchorID == id {
             selectionAnchorID = nil
@@ -1150,9 +1167,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
         }
 
         if wasSelected {
-            let nextIndex = min(index, max(tabs.count - 1, 0))
-            let next = tabs[nextIndex...].first { $0.spaceID == selectedSpaceID }
-                ?? tabs[..<nextIndex].last { $0.spaceID == selectedSpaceID }
+            let next = mostRecentlyActiveTab(in: selectedSpaceID)
                 ?? remainingSpaceTabs.first
             if let next { selectTab(next.id) }
         }
@@ -1572,16 +1587,54 @@ public final class BrowserWindowModel: WebEngineEventSink {
         persist()
     }
 
-    public func moveFolder(_ id: TabFolderID, inside parentID: TabFolderID?) {
-        guard let moving = folder(id), id != parentID else { return }
-        guard parentID.flatMap(folder)?.isSplit != true else { return }
+    @discardableResult
+    public func moveFolder(
+        _ id: TabFolderID,
+        inside parentID: TabFolderID?,
+        persistChange: Bool = true
+    ) -> Bool {
+        guard let moving = folder(id), id != parentID else { return false }
+        guard parentID.flatMap(folder)?.isSplit != true else { return false }
         guard parentID.flatMap(folder)?.spaceID == nil
                 || parentID.flatMap(folder)?.spaceID == moving.spaceID
-        else { return }
-        if let parentID, isFolder(parentID, descendantOf: id) { return }
+        else { return false }
+        if let parentID, isFolder(parentID, descendantOf: id) { return false }
         moving.parentID = parentID
         moving.position = nextPosition(in: parentID, excludingFolderID: id)
-        persist()
+        if persistChange { persist() }
+        return true
+    }
+
+    /// Places a folder beside a regular tab so folders and tabs share one
+    /// ordered sidebar tree.
+    @discardableResult
+    func moveFolder(
+        _ id: TabFolderID,
+        relativeTo targetTabID: TabID,
+        insertAfter: Bool,
+        persistChange: Bool = true
+    ) -> Bool {
+        guard let moving = folder(id),
+              let target = tab(targetTabID),
+              !target.isPinned,
+              moving.spaceID == target.spaceID,
+              target.folderID.map({ isFolder($0, descendantOf: id) }) != true
+        else { return false }
+        let parentID = target.folderID
+        moving.parentID = parentID
+        var items = sidebarItems(in: parentID).filter { item in
+            if case let .folder(folder) = item { return folder.id != id }
+            return true
+        }
+        var insertionIndex = items.firstIndex { item in
+            if case let .tab(tab) = item { return tab.id == targetTabID }
+            return false
+        } ?? items.endIndex
+        if insertAfter, insertionIndex < items.endIndex { insertionIndex += 1 }
+        items.insert(.folder(moving), at: insertionIndex)
+        assignPositions(to: items)
+        if persistChange { persist() }
+        return true
     }
 
     public func deleteFolder(_ id: TabFolderID) {
@@ -1874,6 +1927,21 @@ public final class BrowserWindowModel: WebEngineEventSink {
         guard !isPreviewTipDismissed else { return }
         isPreviewTipDismissed = true
         UserDefaults.standard.set(true, forKey: Self.previewTipDismissedKey)
+    }
+
+    /// Pauses a resident background tab until it is selected or explicitly woken.
+    public func sleepTab(_ id: TabID) {
+        guard id != selectedTabID,
+              tab(id)?.lifecycleState == .liveBackground
+        else { return }
+        suspend(tabID: id)
+        persist()
+    }
+
+    public func wakeTab(_ id: TabID) {
+        guard tab(id)?.lifecycleState == .suspended else { return }
+        resume(tabID: id)
+        persist()
     }
 
     public func showAutoHideSidebar() {
@@ -2285,15 +2353,6 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
     public func webEngine(
         _ session: WebEngineSession,
-        requestsSaveBookmarkFor url: URL,
-        title: String?,
-        sourcePoint: CGPoint?
-    ) {
-        saveLinkAsBookmark(url, title: title, sourcePoint: sourcePoint)
-    }
-
-    public func webEngine(
-        _ session: WebEngineSession,
         createNewTabWith configuration: WKWebViewConfiguration,
         request: URLRequest?
     ) -> WKWebView? {
@@ -2553,6 +2612,8 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
     private func activateSelectedTabIfNeeded() {
         guard let tab = activeTab else { return }
+        recordTabActivation(tab.id)
+        expandFolderPath(containing: tab)
         let engine = ensureEngine(for: tab)
         engine.setMediaPlaybackSuspended(false)
         tab.lifecycleState = .active
@@ -2575,6 +2636,32 @@ public final class BrowserWindowModel: WebEngineEventSink {
                 companionEngine.load(url)
             }
             companionEngine.refreshMediaPlaybackState()
+        }
+    }
+
+    private func recordTabActivation(_ id: TabID) {
+        tabActivationHistory.removeAll { $0 == id }
+        tabActivationHistory.insert(id, at: 0)
+        if tabActivationHistory.count > 100 {
+            tabActivationHistory.removeLast(tabActivationHistory.count - 100)
+        }
+    }
+
+    private func mostRecentlyActiveTab(in spaceID: TabSpaceID) -> BrowserTab? {
+        tabActivationHistory.lazy
+            .compactMap(tab)
+            .first { $0.spaceID == spaceID }
+    }
+
+    /// Selecting a nested tab should always reveal it in the sidebar.
+    private func expandFolderPath(containing tab: BrowserTab) {
+        var currentID = tab.folderID
+        var visited: Set<TabFolderID> = []
+        while let id = currentID,
+              visited.insert(id).inserted,
+              let current = folder(id) {
+            current.isExpanded = true
+            currentID = current.parentID
         }
     }
 
@@ -2648,9 +2735,14 @@ public final class BrowserWindowModel: WebEngineEventSink {
         }
 
         lifecycleTimerTask = Task { @MainActor [weak self] in
+            var secondsSinceBackgroundRefresh = 0
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: .seconds(1))
                 guard !Task.isCancelled else { return }
+                self?.refreshVisibleMediaState()
+                secondsSinceBackgroundRefresh += 1
+                guard secondsSinceBackgroundRefresh >= 30 else { continue }
+                secondsSinceBackgroundRefresh = 0
                 self?.refreshBackgroundMediaState { [weak self] in
                     self?.reconcileLifecycle(mediaStateIsFresh: true)
                 }
@@ -3022,6 +3114,12 @@ public final class BrowserWindowModel: WebEngineEventSink {
             .filter { $0.id != selectedTabID }
             .map(\.id)
         refreshMediaState(for: backgroundIDs, completion: completion)
+    }
+
+    private func refreshVisibleMediaState() {
+        for tab in activeSplitTabs {
+            tab.engine?.refreshMediaPlaybackState()
+        }
     }
 
     private func refreshMediaState(

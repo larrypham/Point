@@ -32,7 +32,12 @@ struct SidebarView: View {
         Group {
             if model.sidebarMode == .pinned {
                 sidebarBase
-                    .background { pinnedSidebarBackground }
+                    .browserTintedGlass(tint: Color.accentColor.opacity(0.05))
+                    .background {
+                        if isFullScreen, !reduceTransparency {
+                            FullScreenPanelBackdropView()
+                        }
+                    }
                     .contentShape(Rectangle())
             } else {
                 sidebarBase
@@ -75,15 +80,6 @@ struct SidebarView: View {
             .overlay(alignment: .topLeading) {
                 sidebarDragOverlay
             }
-    }
-
-    @ViewBuilder
-    private var pinnedSidebarBackground: some View {
-        if reduceTransparency {
-            Color(nsColor: .windowBackgroundColor)
-        } else {
-            Rectangle().fill(.ultraThinMaterial)
-        }
     }
 
     private var sidebarContent: some View {
@@ -302,22 +298,32 @@ struct SidebarView: View {
 
     @ViewBuilder
     private var sidebarDragOverlay: some View {
-        if let tab = reorderState.anchorTab,
-           let frame = reorderState.overlayFrame {
+        if let frame = reorderState.overlayFrame {
             Group {
                 switch reorderState.sourceVisual {
                 case .regular:
-                    FloatingTabRow(
-                        model: model,
-                        tab: tab,
-                        count: reorderState.draggedTabIDs.count
-                    )
+                    if let tab = reorderState.anchorTab {
+                        FloatingTabRow(
+                            model: model,
+                            tab: tab,
+                            count: reorderState.draggedTabIDs.count
+                        )
+                    }
                 case .pinned:
-                    FloatingPinnedTabCard(
-                        model: model,
-                        tab: tab,
-                        count: reorderState.draggedTabIDs.count
-                    )
+                    if let tab = reorderState.anchorTab {
+                        FloatingPinnedTabCard(
+                            model: model,
+                            tab: tab,
+                            count: reorderState.draggedTabIDs.count
+                        )
+                    }
+                case .folder:
+                    if let folder = reorderState.anchorFolder {
+                        FolderDragPreview(
+                            title: model.displayName(for: folder),
+                            symbolName: folder.symbolName
+                        )
+                    }
                 }
             }
             .frame(width: frame.width, height: frame.height)
@@ -941,6 +947,7 @@ private enum SidebarCoordinateSpace {
 private enum SidebarDragVisual {
     case regular
     case pinned
+    case folder
 }
 
 private enum SidebarLayoutKey: Hashable {
@@ -1027,6 +1034,7 @@ private final class SidebarReorderState {
     @ObservationIgnored private(set) var listBounds = CGRect.zero
     @ObservationIgnored private(set) var windowFrame = CGRect.zero
     private(set) var anchorTab: BrowserTab?
+    private(set) var anchorFolder: TabFolder?
     private(set) var draggedTabIDs: Set<TabID> = []
     private(set) var sourceVisual: SidebarDragVisual = .regular
 
@@ -1037,8 +1045,12 @@ private final class SidebarReorderState {
     private var currentLocation = CGPoint.zero
     private var grabOffsetY: CGFloat = 0
 
+    private var isDragging: Bool {
+        anchorTab != nil || anchorFolder != nil
+    }
+
     var overlayFrame: CGRect? {
-        guard anchorTab != nil, !sourceFrame.isEmpty else { return nil }
+        guard isDragging, !sourceFrame.isEmpty else { return nil }
         let bounds = listBounds.isEmpty ? sourceFrame.insetBy(dx: -300, dy: -300) : listBounds
         let height = sourceFrame.height
         let unclampedY = currentLocation.y - grabOffsetY
@@ -1051,7 +1063,7 @@ private final class SidebarReorderState {
                 max(bounds.minX + 8, bounds.maxX - sourceFrame.width - 8)
             )
             return CGRect(x: x, y: y, width: sourceFrame.width, height: height)
-        case .regular:
+        case .regular, .folder:
             let destinationFrame = target.flatMap { layouts[$0.key]?.frame }
             let baseFrame = destinationFrame ?? sourceFrame
             let extraIndent: CGFloat = target?.placement == .inside ? 15 : 0
@@ -1062,7 +1074,7 @@ private final class SidebarReorderState {
     }
 
     func placement(for key: SidebarLayoutKey) -> SidebarDropPlacement? {
-        guard anchorTab != nil, target?.key == key else { return nil }
+        guard isDragging, target?.key == key else { return nil }
         return target?.placement
     }
 
@@ -1072,8 +1084,11 @@ private final class SidebarReorderState {
     ) {
         guard layouts != self.layouts else { return }
         self.layouts = layouts
-        guard let anchorTab else { return }
-        if let currentFrame = layouts[.tab(anchorTab.id)]?.frame,
+        guard isDragging else { return }
+        let sourceKey = anchorTab.map { SidebarLayoutKey.tab($0.id) }
+            ?? anchorFolder.map { SidebarLayoutKey.folder($0.id) }
+        if let sourceKey,
+           let currentFrame = layouts[sourceKey]?.frame,
            sourceFrame.isEmpty {
             sourceFrame = currentFrame
         }
@@ -1094,32 +1109,36 @@ private final class SidebarReorderState {
         location: CGPoint,
         model: BrowserWindowModel
     ) {
-        if anchorTab == nil {
-            let hoveredTabs = layouts.values.filter { layout in
-                guard layout.kind == .regularTab || layout.kind == .pinnedTab else {
-                    return false
-                }
-                return layout.frame.contains(startLocation)
+        if !isDragging {
+            let hoveredItems = layouts.values.filter { layout in
+                layout.kind != .rootEnd && layout.frame.contains(startLocation)
             }
-            guard let layout = hoveredTabs.min(by: { lhs, rhs in
+            guard let layout = hoveredItems.min(by: { lhs, rhs in
                 abs(lhs.frame.midX - startLocation.x) < abs(rhs.frame.midX - startLocation.x)
-            }),
-            case let .tab(id) = layout.key,
-            let tab = model.tabs.first(where: { $0.id == id })
-            else { return }
-            let ids = model.selectedTabIDs.contains(id) ? model.selectedTabIDs : [id]
-            begin(
-                tab: tab,
-                ids: ids,
-                sourceVisual: layout.kind == .pinnedTab ? .pinned : .regular,
-                startLocation: startLocation,
-                model: model
-            )
+            }) else { return }
+            switch layout.key {
+            case let .tab(id):
+                guard let tab = model.tabs.first(where: { $0.id == id }) else { return }
+                let ids = model.selectedTabIDs.contains(id) ? model.selectedTabIDs : [id]
+                begin(
+                    tab: tab,
+                    ids: ids,
+                    sourceVisual: layout.kind == .pinnedTab ? .pinned : .regular,
+                    startLocation: startLocation,
+                    model: model
+                )
+            case let .folder(id):
+                guard let folder = model.folders.first(where: { $0.id == id }) else { return }
+                begin(folder: folder, startLocation: startLocation, model: model)
+            case .rootEnd:
+                return
+            }
         }
-        guard let anchorTab else { return }
+        guard isDragging else { return }
         currentLocation = location
 
-        if let side = splitDropSide(at: location, for: anchorTab, model: model) {
+        if let anchorTab,
+           let side = splitDropSide(at: location, for: anchorTab, model: model) {
             model.updateSplitDropSide(side)
             target = nil
             lastAppliedTarget = nil
@@ -1130,13 +1149,14 @@ private final class SidebarReorderState {
     }
 
     func finish(model: BrowserWindowModel) {
-        guard let anchorTab else { return }
+        guard isDragging else { return }
         let side = model.splitDropSide
         model.finishDragReordering()
-        if let side {
+        if let side, let anchorTab {
             model.createSplit(with: anchorTab.id, placingOn: side)
         }
         self.anchorTab = nil
+        anchorFolder = nil
         draggedTabIDs = []
         target = nil
         lastAppliedTarget = nil
@@ -1162,6 +1182,20 @@ private final class SidebarReorderState {
         model.beginDraggingTabs(ids)
     }
 
+    private func begin(
+        folder: TabFolder,
+        startLocation: CGPoint,
+        model: BrowserWindowModel
+    ) {
+        guard let frame = layouts[.folder(folder.id)]?.frame else { return }
+        anchorFolder = folder
+        sourceVisual = .folder
+        sourceFrame = frame
+        currentLocation = startLocation
+        grabOffsetY = min(max(startLocation.y - frame.minY, 0), frame.height)
+        model.beginDraggingFolder(folder.id)
+    }
+
     /// Splitting is offered once a single dragged tab leaves the sidebar and hovers
     /// one half of the page area. `location` is in the sidebar's coordinate space.
     private func splitDropSide(
@@ -1181,11 +1215,15 @@ private final class SidebarReorderState {
     }
 
     private func updateTarget(at location: CGPoint, model: BrowserWindowModel) {
-        guard !draggedTabIDs.isEmpty else { return }
+        guard isDragging else { return }
         let candidates = layouts.values.filter { layout in
             guard !layout.frame.isEmpty else { return false }
             if case let .tab(id) = layout.key {
+                if anchorFolder != nil, layout.kind == .pinnedTab { return false }
                 return !draggedTabIDs.contains(id)
+            }
+            if case let .folder(id) = layout.key, id == anchorFolder?.id {
+                return false
             }
             return true
         }
@@ -1196,33 +1234,72 @@ private final class SidebarReorderState {
             placement: placement,
             depth: placement == .inside ? layout.depth + 1 : layout.depth
         )
-        target = proposedTarget
         guard proposedTarget != lastAppliedTarget else { return }
-        lastAppliedTarget = proposedTarget
 
+        var didMove = false
         withAnimation(.snappy(duration: 0.14)) {
-            switch layout.key {
-            case let .tab(id):
-                model.moveTabs(
-                    draggedTabIDs,
-                    relativeTo: id,
-                    insertAfter: placement == .after,
-                    persistChange: false
-                )
-            case let .folder(id):
-                if placement == .inside {
-                    model.moveTabs(draggedTabIDs, to: id, persistChange: false)
-                } else {
+            if !draggedTabIDs.isEmpty {
+                switch layout.key {
+                case let .tab(id):
                     model.moveTabs(
                         draggedTabIDs,
                         relativeTo: id,
                         insertAfter: placement == .after,
                         persistChange: false
                     )
+                case let .folder(id):
+                    if placement == .inside {
+                        model.moveTabs(draggedTabIDs, to: id, persistChange: false)
+                    } else {
+                        model.moveTabs(
+                            draggedTabIDs,
+                            relativeTo: id,
+                            insertAfter: placement == .after,
+                            persistChange: false
+                        )
+                    }
+                case .rootEnd:
+                    model.moveTabs(draggedTabIDs, to: nil, persistChange: false)
                 }
-            case .rootEnd:
-                model.moveTabs(draggedTabIDs, to: nil, persistChange: false)
+                didMove = true
+            } else if let folderID = anchorFolder?.id {
+                switch layout.key {
+                case let .tab(id):
+                    didMove = model.moveFolder(
+                        folderID,
+                        relativeTo: id,
+                        insertAfter: placement == .after,
+                        persistChange: false
+                    )
+                case let .folder(id):
+                    if placement == .inside {
+                        didMove = model.moveFolder(
+                            folderID,
+                            inside: id,
+                            persistChange: false
+                        )
+                    } else {
+                        didMove = model.moveFolder(
+                            folderID,
+                            relativeTo: id,
+                            insertAfter: placement == .after,
+                            persistChange: false
+                        )
+                    }
+                case .rootEnd:
+                    didMove = model.moveFolder(
+                        folderID,
+                        inside: nil,
+                        persistChange: false
+                    )
+                }
             }
+        }
+        if didMove {
+            target = proposedTarget
+            lastAppliedTarget = proposedTarget
+        } else {
+            target = nil
         }
     }
 
@@ -1302,15 +1379,6 @@ private struct PinnedTabCard: View {
                         .fill(cardFill)
 
                     TabFavicon(tab: tab, size: 24)
-                        .highPriorityGesture(
-                            SpatialTapGesture(coordinateSpace: .global).onEnded { event in
-                                model.saveTabAsBookmark(
-                                    tab.id,
-                                    sourcePoint: event.location
-                                )
-                            }
-                        )
-                        .help(BrowserLocalization.string("save_tab_to_bookmarks_help"))
                         .offset(y: isHovering && tab.domain != nil ? -7 : 0)
 
                     if tab.lifecycleState == .evicted {
@@ -1426,6 +1494,20 @@ private struct PinnedTabCard: View {
                 }
             }
         }
+        Button(BrowserLocalization.string("save_to_bookmarks")) {
+            model.saveTabAsBookmark(tab.id)
+        }
+        .disabled(tab.url == nil || tab.spaceID == .bookmarks)
+        if tab.lifecycleState == .suspended {
+            Button(BrowserLocalization.string("wake_tab")) {
+                model.wakeTab(tab.id)
+            }
+        } else {
+            Button(BrowserLocalization.string("sleep_tab")) {
+                model.sleepTab(tab.id)
+            }
+            .disabled(tab.id == model.selectedTabID || tab.lifecycleState != .liveBackground)
+        }
         Divider()
         if !model.isPrivate, tab.url != nil {
             Button(BrowserLocalization.string("bookmark_tab")) {
@@ -1499,15 +1581,6 @@ private struct TabRow: View {
     private var rowLabel: some View {
         HStack(spacing: 9) {
             TabFavicon(tab: tab, size: 22)
-                .highPriorityGesture(
-                    SpatialTapGesture(coordinateSpace: .global).onEnded { event in
-                        model.saveTabAsBookmark(
-                            tab.id,
-                            sourcePoint: event.location
-                        )
-                    }
-                )
-                .help(BrowserLocalization.string("save_tab_to_bookmarks_help"))
             tabTitle
             Spacer(minLength: 4)
             if tab.lifecycleState == .evicted {
@@ -1609,6 +1682,20 @@ private struct TabRow: View {
                     }
                 }
             }
+        }
+        Button(BrowserLocalization.string("save_to_bookmarks")) {
+            model.saveTabAsBookmark(tab.id)
+        }
+        .disabled(tab.url == nil || tab.spaceID == .bookmarks)
+        if tab.lifecycleState == .suspended {
+            Button(BrowserLocalization.string("wake_tab")) {
+                model.wakeTab(tab.id)
+            }
+        } else {
+            Button(BrowserLocalization.string("sleep_tab")) {
+                model.sleepTab(tab.id)
+            }
+            .disabled(tab.id == model.selectedTabID || tab.lifecycleState != .liveBackground)
         }
         Divider()
         if !model.isPrivate, tab.url != nil {
@@ -1739,21 +1826,15 @@ private struct FolderRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 7) {
-                Button {
-                    model.toggleFolder(folder.id)
-                } label: {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(.tertiary)
-                        .rotationEffect(.degrees(folder.isExpanded ? 90 : 0))
-                        .frame(width: 13, height: 22)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .animation(
-                    reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.72),
-                    value: folder.isExpanded
-                )
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.tertiary)
+                    .rotationEffect(.degrees(folder.isExpanded ? 90 : 0))
+                    .frame(width: 13, height: 22)
+                    .animation(
+                        reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.72),
+                        value: folder.isExpanded
+                    )
 
                 Image(systemName: folder.symbolName)
                     .font(.system(size: 15, weight: .medium))
@@ -1816,6 +1897,7 @@ private struct FolderRow: View {
                     cornerRadius: 9
                 )
             }
+            .opacity(reorderState.anchorFolder?.id == folder.id ? 0 : 1)
             .background {
                 SidebarItemLayoutReader(
                     layout: SidebarItemLayout(
@@ -1827,17 +1909,9 @@ private struct FolderRow: View {
                 )
             }
             .contentShape(Rectangle())
-            .onTapGesture(count: 2) {
-                if !folder.isSplit { beginRenaming() }
-            }
-            .onDrag {
-                model.beginDraggingFolder(folder.id)
-                return .sidebarItem(.folder(folder.id))
-            } preview: {
-                FolderDragPreview(
-                    title: model.displayName(for: folder),
-                    symbolName: folder.symbolName
-                )
+            .onTapGesture {
+                guard model.renamingFolderID != folder.id else { return }
+                model.toggleFolder(folder.id)
             }
             .onDrop(
                 of: [.browserSidebarItem],
@@ -2081,35 +2155,18 @@ private struct SidebarDropIndicator: View {
     let cornerRadius: CGFloat
 
     var body: some View {
-        ZStack {
+        Group {
             if placement == .inside {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.accentColor.opacity(0.72), lineWidth: 1.5)
+                    .stroke(Color.accentColor.opacity(0.5), lineWidth: 1)
                     .background(
-                        Color.accentColor.opacity(0.07),
+                        Color.accentColor.opacity(0.06),
                         in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     )
             }
-
-            if placement == .before || placement == .after {
-                insertionLine
-                    .frame(maxHeight: .infinity, alignment: placement == .before ? .top : .bottom)
-            }
         }
         .allowsHitTesting(false)
-        .animation(.easeOut(duration: 0.1), value: placement)
-    }
-
-    private var insertionLine: some View {
-        HStack(spacing: 0) {
-            Circle()
-                .fill(Color.accentColor)
-                .frame(width: 6, height: 6)
-            Capsule()
-                .fill(Color.accentColor)
-                .frame(height: 2)
-        }
-        .padding(.horizontal, 3)
+        .animation(.easeOut(duration: 0.12), value: placement)
     }
 }
 
