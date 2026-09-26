@@ -265,6 +265,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public var sidebarMode: SidebarMode = .pinned
     public var isSidebarVisible = true
     public var isOmniboxPresented = false
+    public var isTabOverviewPresented = false
     public private(set) var isNewTabComposerPresented = false
     public var omniboxText = ""
     public var omniboxError: String?
@@ -1144,8 +1145,8 @@ public final class BrowserWindowModel: WebEngineEventSink {
     }
 
     public func closeTab(_ id: TabID) {
-        dissolveSplitContaining(id)
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return }
+        dissolveSplitContaining(id)
         let removedFolderID = tabs[index].folderID
         let wasSelected = selectedTabID == id
         rememberClosedTab(tabs[index])
@@ -1815,6 +1816,15 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public func selectOpenTabFromOmnibox(_ id: TabID) {
         dismissOmnibox()
         selectTab(id)
+    }
+
+    public func toggleTabOverview() {
+        dismissOmnibox()
+        isTabOverviewPresented.toggle()
+    }
+
+    public func dismissTabOverview() {
+        isTabOverviewPresented = false
     }
 
     public func navigate(tabID: TabID, to destination: OmniboxDestination) {

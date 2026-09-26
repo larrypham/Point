@@ -48,8 +48,7 @@ public struct BrowserCommands: Commands {
 
         CommandGroup(replacing: .saveItem) {
             Button(BrowserLocalization.string("close_tab")) {
-                guard let id = model?.selectedTabID else { return }
-                model?.closeTab(id)
+                closeSelectedTabOrWindow()
             }
             .keyboardShortcut("w", modifiers: [.command])
 
@@ -85,9 +84,15 @@ public struct BrowserCommands: Commands {
         }
 
         CommandMenu(BrowserLocalization.string("tabs")) {
+            Button(BrowserLocalization.string("tab_overview")) {
+                model?.toggleTabOverview()
+            }
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+
+            Divider()
+
             Button(BrowserLocalization.string("close_tab")) {
-                guard let id = model?.selectedTabID else { return }
-                model?.closeTab(id)
+                closeSelectedTabOrWindow()
             }
             .keyboardShortcut("w", modifiers: [.command])
 
@@ -199,5 +204,15 @@ public struct BrowserCommands: Commands {
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
         }
+    }
+
+    private func closeSelectedTabOrWindow() {
+        guard let model else { return }
+        guard let id = model.selectedTabID else {
+            guard model.tabs.isEmpty else { return }
+            NSApp.keyWindow?.performClose(nil)
+            return
+        }
+        model.closeTab(id)
     }
 }

@@ -194,6 +194,19 @@ public struct BrowserWindowView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
 
+            if model.isTabOverviewPresented {
+                Color(nsColor: .windowBackgroundColor)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture { model.dismissTabOverview() }
+                    .zIndex(89)
+
+                TabOverviewView(model: model)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                    .zIndex(90)
+            }
+
             if model.isFindPresented {
                 FindOverlay(model: model)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
@@ -362,6 +375,7 @@ public struct BrowserWindowView: View {
             value: model.isAIChatPanelVisible
         )
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: model.isOmniboxPresented)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: model.isTabOverviewPresented)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: indicatorDownload?.id)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: model.mediaPermissionPrompt?.id)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: model.isSitePermissionsPresented)

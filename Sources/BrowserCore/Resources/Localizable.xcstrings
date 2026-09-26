@@ -1697,22 +1697,6 @@
         }
       }
     },
-    "bookmarks_space_help": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bookmarks. Choose “Save to Bookmarks” from a tab or link menu."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Закладки. Выберите «Сохранить в закладки» в меню вкладки или ссылки."
-          }
-        }
-      }
-    },
     "default_browser_change_failed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2154,6 +2138,159 @@
         }
       }
     },
+    "fullscreen_panel_backdrop_aurora" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aurora"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Северное сияние"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_backdrop_custom" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Gradient"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свой градиент"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_backdrop_ocean" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocean"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Океан"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_backdrop_picker" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фон"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_backdrop_sunset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunset"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закат"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_custom_end" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Color"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конечный цвет"
+          }
+        }
+      }
+    },
+    "fullscreen_panel_custom_start" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Color"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начальный цвет"
+          }
+        }
+      }
+    },
+    "fullscreen_panels" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full-Screen Side Panels"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Боковые панели во весь экран"
+          }
+        }
+      }
+    },
+    "fullscreen_panels_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the gradient that shows through the pinned sidebar and assistant panel in full screen. Floating panels are unchanged."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите градиент, просвечивающий сквозь закреплённый сайдбар и панель ассистента в полноэкранном режиме. Вид плавающих панелей не меняется."
+          }
+        }
+      }
+    },
     "games" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2468,72 +2605,13 @@
         }
       }
     },
-    "fullscreen_panel_backdrop_aurora": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Aurora" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Северное сияние" } }
-      }
-    },
-    "fullscreen_panel_backdrop_ocean": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ocean" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Океан" } }
-      }
-    },
-    "fullscreen_panel_backdrop_picker": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Background" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Фон" } }
-      }
-    },
-    "fullscreen_panel_backdrop_sunset": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Sunset" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Закат" } }
-      }
-    },
-    "fullscreen_panel_backdrop_custom": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Custom Gradient" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Свой градиент" } }
-      }
-    },
-    "fullscreen_panel_custom_end": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "End Color" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Конечный цвет" } }
-      }
-    },
-    "fullscreen_panel_custom_start": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Start Color" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Начальный цвет" } }
-      }
-    },
-    "fullscreen_panels": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Full-Screen Side Panels" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Боковые панели во весь экран" } }
-      }
-    },
-    "fullscreen_panels_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Choose the gradient that shows through the pinned sidebar and assistant panel in full screen. Floating panels are unchanged." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Выберите градиент, просвечивающий сквозь закреплённый сайдбар и панель ассистента в полноэкранном режиме. Вид плавающих панелей не меняется." } }
-      }
-    },
-    "forward": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forward"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вперёд"
+    "move_to_new_window" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move to New Window"
           }
         }
       }
@@ -3592,6 +3670,23 @@
         }
       }
     },
+    "save_to_bookmarks" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save to Bookmarks"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить в закладки"
+          }
+        }
+      }
+    },
     "search_engine_help" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3656,6 +3751,23 @@
         }
       }
     },
+    "search_tabs" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search Tabs"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск вкладок"
+          }
+        }
+      }
+    },
     "select_all" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3707,6 +3819,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Could Not Restore Session: %@"
+          }
+        }
+      }
+    },
+    "settings_section_appearance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оформление"
+          }
+        }
+      }
+    },
+    "settings_section_assistant" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistant"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ассистент"
+          }
+        }
+      }
+    },
+    "settings_section_general" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Основные"
+          }
+        }
+      }
+    },
+    "settings_section_performance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Performance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Производительность"
+          }
+        }
+      }
+    },
+    "settings_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки"
           }
         }
       }
@@ -3838,48 +4035,19 @@
         }
       }
     },
-    "settings_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Settings" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Настройки" } }
-      }
-    },
-    "settings_section_appearance": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Appearance" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Оформление" } }
-      }
-    },
-    "settings_section_assistant": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Assistant" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ассистент" } }
-      }
-    },
-    "settings_section_general": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "General" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Основные" } }
-      }
-    },
-    "settings_section_performance": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Performance" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Производительность" } }
-      }
-    },
-    "search_engine_help": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search: %@"
+    "sleep_tab" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep Tab"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поиск: %@"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усыпить вкладку"
           }
         }
       }
@@ -3947,6 +4115,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Study"
+          }
+        }
+      }
+    },
+    "tab_overview" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab Overview"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обзор вкладок"
           }
         }
       }
@@ -4434,6 +4619,23 @@
         }
       }
     },
+    "wake_tab" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wake Tab"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разбудить вкладку"
+          }
+        }
+      }
+    },
     "web_cache" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4456,272 +4658,40 @@
         }
       }
     },
-    "save_tab_to_bookmarks_help": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save this tab to Bookmarks"
+    "whats_new" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What’s New"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сохранить эту вкладку в закладки"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что нового"
           }
         }
       }
     },
-    "save_to_bookmarks": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Save to Bookmarks" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Сохранить в закладки" } }
-      }
-    },
-    "sleep_tab": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Sleep Tab" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Усыпить вкладку" } }
-      }
-    },
-    "space_icon": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Space Icon"
+    "work" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Значок пространства"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Работа"
           }
         }
-      }
-    },
-    "space_name_placeholder": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Space Name"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Название пространства"
-          }
-        }
-      }
-    },
-    "web_page": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Web Page"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Веб-страница"
-          }
-        }
-      }
-    },
-    "work": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Work"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Работа"
-          }
-        }
-      }
-    },
-    "later": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Later" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Позже" } }
-      }
-    },
-    "check_for_updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Check for Updates" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверить обновления" } }
-      }
-    },
-    "checking_for_updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Checking for Updates…" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка обновлений…" } }
-      }
-    },
-    "update": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Обновить" } }
-      }
-    },
-    "updates": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Updates" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Обновления" } }
-      }
-    },
-    "updates_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point checks GitHub Releases no more than once every 24 hours while it is running." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point проверяет GitHub Releases не чаще одного раза в 24 часа во время работы." } }
-      }
-    },
-    "update_check_available": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "An update is available." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление." } }
-      }
-    },
-    "update_check_failed": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Could not check for updates. Try again later." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось проверить обновления. Повторите попытку позже." } }
-      }
-    },
-    "update_check_not_configured": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update checks are not configured for this build." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка обновлений не настроена для этой сборки." } }
-      }
-    },
-    "update_check_recently": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Checked recently. Point checks once every 24 hours." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Проверка уже выполнялась недавно. Point проверяет обновления раз в 24 часа." } }
-      }
-    },
-    "update_check_up_to_date": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "You’re up to date." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Установлена актуальная версия." } }
-      }
-    },
-    "update_available_message": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point %@ is ready to download." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point %@ готов к загрузке." } }
-      }
-    },
-    "update_available_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update Available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление" } }
-      }
-    },
-    "update_download_failed": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "The update could not be downloaded. Check your connection and try again later." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось загрузить обновление. Проверьте подключение и повторите попытку позже." } }
-      }
-    },
-    "update_download_failed_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Download Failed" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ошибка загрузки" } }
-      }
-    },
-    "update_downloading_message": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point is downloading the disk image. You can cancel at any time." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point загружает образ диска. Загрузку можно отменить в любой момент." } }
-      }
-    },
-    "update_downloading_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Downloading Update…" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка обновления…" } }
-      }
-    },
-    "update_downloading_percent": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Downloading… %d%%" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Загрузка… %d%%" } }
-      }
-    },
-    "update_details_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point %@ is available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступен Point %@" } }
-      }
-    },
-    "update_available_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Update Available" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Доступно обновление" } }
-      }
-    },
-    "update_ready_instructions": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "The disk image is open in Finder. Quit Point, open the downloaded DMG, drag Point into Applications, replace the old copy, then reopen Point." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Образ диска открыт в Finder. Закройте Point, откройте загруженный DMG, перетащите Point в «Программы», замените старую копию и снова откройте Point." } }
-      }
-    },
-    "update_ready_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ready to Install" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Готово к установке" } }
-      }
-    },
-    "update_ready_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ready to install" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Готово к установке" } }
-      }
-    },
-    "update_retry_sidebar": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Download failed · Try again" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ошибка загрузки · Повторить" } }
-      }
-    },
-    "update_show_in_finder": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Show in Finder" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Показать в Finder" } }
-      }
-    },
-    "release_notes": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Release Notes" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Заметки к релизу" } }
-      }
-    },
-    "release_notes_unavailable": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "No release notes were provided for this version." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Для этой версии заметки к релизу не указаны." } }
-      }
-    },
-    "wake_tab": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Wake Tab" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Разбудить вкладку" } }
-      }
-    },
-    "whats_new": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "What’s New" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Что нового" } }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
