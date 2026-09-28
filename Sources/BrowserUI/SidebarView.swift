@@ -106,13 +106,7 @@ struct SidebarView: View {
                     .padding(.bottom, 8)
             }
 
-            if model.isDownloadsPresented {
-                SidebarDownloadsView(
-                    manager: model.downloadManager,
-                    onResume: model.resumeDownload
-                )
-            } else {
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
                 Button {
                     model.presentOmnibox(clearText: false)
                 } label: {
@@ -188,12 +182,11 @@ struct SidebarView: View {
                         }
                     }
                 }
-                }
-                .frame(maxHeight: .infinity)
-                .offset(x: -spaceSwipeTranslation)
-                .opacity(spacePageOpacity)
-                .clipped()
             }
+            .frame(maxHeight: .infinity)
+            .offset(x: -spaceSwipeTranslation)
+            .opacity(spacePageOpacity)
+            .clipped()
 
             if model.showsMemoryUsage {
                 HStack {
@@ -211,6 +204,13 @@ struct SidebarView: View {
                     .padding(.horizontal, 10)
                     .padding(.top, 8)
                     .padding(.bottom, 10)
+            }
+
+            if let mediaTab = model.sidebarMediaTab {
+                SidebarMediaPlayer(model: model, tab: mediaTab)
+                    .padding(.horizontal, 10)
+                    .padding(.top, 7)
+                    .padding(.bottom, 4)
             }
 
             SpaceSwitcher(model: model)
@@ -385,23 +385,9 @@ struct SidebarView: View {
                 : BrowserLocalization.string("reload"))
 
             Button {
-                model.copyActivePageURL()
-            } label: {
-                Image(systemName: "doc.on.doc")
-                    .frame(width: 24, height: 24)
-            }
-            .disabled(model.activeTab?.url == nil)
-            .help(BrowserLocalization.string("copy_page_address"))
-            .accessibilityLabel(BrowserLocalization.string("copy_page_address"))
-
-            Button {
                 model.toggleAIChat()
             } label: {
-                Image(
-                    systemName: model.isAIChatPanelVisible
-                        ? "sparkles.rectangle.stack.fill"
-                        : "sparkles"
-                )
+                Image(systemName: "sparkles.rectangle.stack")
                 .frame(width: 24, height: 24)
             }
             .help(BrowserLocalization.string("ai_chat_toggle_shortcut"))
@@ -431,6 +417,19 @@ struct SidebarView: View {
             }
             .help(BrowserLocalization.string("downloads_shortcut"))
             .accessibilityLabel(BrowserLocalization.string("downloads"))
+            .popover(
+                isPresented: Binding(
+                    get: { model.isDownloadsPresented },
+                    set: { model.isDownloadsPresented = $0 }
+                ),
+                arrowEdge: .bottom
+            ) {
+                DownloadsPopoverView(
+                    manager: model.downloadManager,
+                    onResume: model.resumeDownload
+                )
+                .frame(width: 380)
+            }
         }
         .buttonStyle(.borderless)
     }
@@ -545,6 +544,65 @@ private struct UpdateAvailableSidebarRow: View {
             return BrowserLocalization.string("update_ready_sidebar")
         case .failed:
             return BrowserLocalization.string("update_retry_sidebar")
+        }
+    }
+}
+
+private struct SidebarMediaPlayer: View {
+    let model: BrowserWindowModel
+    let tab: BrowserTab
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Button {
+                model.selectTab(tab.id)
+            } label: {
+                HStack(spacing: 9) {
+                    TabFavicon(tab: tab, size: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tab.displayTitle)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        if let domain = tab.domain {
+                            Text(domain)
+                                .font(.system(size: 10))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(BrowserLocalization.string("media_open_tab"))
+
+            Button {
+                model.toggleMediaPlayback(for: tab.id)
+            } label: {
+                Image(systemName: tab.mediaPlayback?.isPlaying == true
+                    ? "pause.fill" : "play.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 30, height: 30)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .help(BrowserLocalization.string(tab.mediaPlayback?.isPlaying == true
+                ? "media_pause" : "media_play"))
+            .accessibilityLabel(BrowserLocalization.string(
+                tab.mediaPlayback?.isPlaying == true ? "media_pause" : "media_play"
+            ))
+        }
+        .padding(.leading, 9)
+        .padding(.trailing, 5)
+        .frame(height: 48)
+        .background(.primary.opacity(0.18), in: RoundedRectangle(cornerRadius: 11))
+        .overlay {
+            RoundedRectangle(cornerRadius: 11)
+                .strokeBorder(.primary.opacity(0.12), lineWidth: 1)
         }
     }
 }

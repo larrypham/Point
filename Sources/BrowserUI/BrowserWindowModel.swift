@@ -27,6 +27,7 @@ public final class BrowserTab: Identifiable {
     public var canGoBack = false
     public var canGoForward = false
     public var engine: WebEngineSession?
+    public var mediaPlayback: WebMediaPlayback?
     public var favicon: NSImage?
     public var isShowingRestorationPlaceholder = false
     var navigationHistory: TabNavigationHistory
@@ -309,6 +310,15 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public var openAIChatWindowRequest: (@MainActor (_ token: UUID) -> Void)?
     @ObservationIgnored private var aiToolBridge: BrowserAIToolBridge?
 
+    public private(set) var isExternalAgentAccessEnabled = false
+    public private(set) var automaticallyAllowsExternalAgentControl = false
+    var externalAgentServerState: PointMCPServerState = .stopped
+    @ObservationIgnored private var pointMCPServer: PointMCPServer?
+    @ObservationIgnored private var pointMCPRestartTask: Task<Void, Never>?
+    @ObservationIgnored private var pointMCPRestartAttempt = 0
+    @ObservationIgnored private var allowsExternalAgentAccess: Bool
+    @ObservationIgnored private var agentControlReservationID: UUID?
+
     /// What the assistant is doing to the page right now, for the blue glow
     /// and the click markers drawn over the web surface.
     public let agentActivity = AgentActivityCenter()
@@ -347,6 +357,8 @@ public final class BrowserWindowModel: WebEngineEventSink {
     @ObservationIgnored private var thermalObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var currentPressure: MemoryPressureLevel = .normal
     @ObservationIgnored private var applicationIsActive = true
+    @ObservationIgnored private var pictureInPictureWindowVisible = true
+    @ObservationIgnored private weak var hostWindow: NSWindow?
     @ObservationIgnored private var acceptsMediaPermissionRequests = true
     @ObservationIgnored private var pressureSequence = 0
     @ObservationIgnored private var appliedPressureSequence = 0
@@ -369,7 +381,8 @@ public final class BrowserWindowModel: WebEngineEventSink {
         passkeyAccessManager: PasskeyAccessManager? = nil,
         faviconRepository: FaviconRepository? = nil,
         isPrivate: Bool = false,
-        websiteDataStore: WKWebsiteDataStore? = nil
+        websiteDataStore: WKWebsiteDataStore? = nil,
+        allowsExternalAgentAccess: Bool = true
     ) {
         let storedSearchEngine = UserDefaults.standard
             .string(forKey: "DefaultSearchEngine")
@@ -380,6 +393,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
         self.browsingHistoryRepository = browsingHistoryRepository
         self.bookmarkRepository = bookmarkRepository
         self.isPrivate = isPrivate
+        self.allowsExternalAgentAccess = allowsExternalAgentAccess && !isPrivate
         self.websiteDataStore = websiteDataStore
             ?? (isPrivate ? .nonPersistent() : .default())
         self.showsMemoryUsage = UserDefaults.standard.bool(
@@ -387,6 +401,12 @@ public final class BrowserWindowModel: WebEngineEventSink {
         )
         self.isPreviewTipDismissed = UserDefaults.standard.bool(
             forKey: Self.previewTipDismissedKey
+        )
+        self.isExternalAgentAccessEnabled = self.allowsExternalAgentAccess && UserDefaults.standard.bool(
+            forKey: "PointExternalAgentAccessEnabled"
+        )
+        self.automaticallyAllowsExternalAgentControl = UserDefaults.standard.bool(
+            forKey: "PointExternalAgentAutoApproveControl"
         )
         self.searchEngine = storedSearchEngine
         self.parser = parser ?? OmniboxParser(searchEngine: storedSearchEngine)
@@ -400,6 +420,21 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
     public var activeTab: BrowserTab? {
         tabs.first { $0.id == selectedTabID }
+    }
+
+    public var sidebarMediaTab: BrowserTab? {
+        tabs
+            .filter { $0.engine != nil && $0.mediaPlayback != nil }
+            .sorted { lhs, rhs in
+                if lhs.mediaPlayback?.isPlaying != rhs.mediaPlayback?.isPlaying {
+                    return lhs.mediaPlayback?.isPlaying == true
+                }
+                if (lhs.id == selectedTabID) != (rhs.id == selectedTabID) {
+                    return lhs.id == selectedTabID
+                }
+                return lhs.lastInteractionAt > rhs.lastInteractionAt
+            }
+            .first
     }
 
     public var selectedSpace: TabSpace? {
@@ -1262,6 +1297,11 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
     public func selectTab(_ id: TabID, extendingSelection: Bool = false) {
         guard let requestedTab = tab(id) else { return }
+        if id != selectedTabID,
+           requestedTab.spaceID == selectedSpaceID,
+           !activeSplitTabs.contains(where: { $0.id == id }) {
+            requestAutomaticPictureInPictureForVisibleTabs()
+        }
         if requestedTab.spaceID != selectedSpaceID {
             selectedSpace?.lastSelectedTabID = selectedTabID
             backgroundVisibleTabs()
@@ -1910,6 +1950,12 @@ public final class BrowserWindowModel: WebEngineEventSink {
         downloadManager.resume(id, using: engine.webView)
     }
 
+    public func presentDownloads() {
+        guard previewTab == nil else { return }
+        isSidebarVisible = true
+        isDownloadsPresented = true
+    }
+
     public func toggleDownloads() {
         guard previewTab == nil else { return }
         isDownloadsPresented.toggle()
@@ -1984,6 +2030,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
     public func presentAIChat() {
         guard previewTab == nil else { return }
+        AIChatSettings.shared.loadAPIKeysIfNeeded()
         prepareAIChatIfNeeded()
         aiChat.isDetached = false
         isAIChatPresented = true
@@ -2010,6 +2057,111 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public func stopAgentControl() {
         aiChat.cancelStreaming()
         aiToolBridge?.releaseBrowserControl()
+        pointMCPServer?.releaseAllControl()
+    }
+
+    func reserveAgentControl(_ id: UUID) -> Bool {
+        guard agentControlReservationID == nil || agentControlReservationID == id else {
+            return false
+        }
+        agentControlReservationID = id
+        return true
+    }
+
+    func releaseAgentControlReservation(_ id: UUID) {
+        guard agentControlReservationID == id else { return }
+        agentControlReservationID = nil
+    }
+
+    public func startExternalAgentAccessIfNeeded() {
+        guard isExternalAgentAccessEnabled, allowsExternalAgentAccess else { return }
+        startExternalAgentServer()
+    }
+
+    public var hasExternalAgentOwnership: Bool { allowsExternalAgentAccess }
+
+    public func setExternalAgentOwnership(_ ownsAccess: Bool) {
+        guard !isPrivate, allowsExternalAgentAccess != ownsAccess else { return }
+        allowsExternalAgentAccess = ownsAccess
+        isExternalAgentAccessEnabled = UserDefaults.standard.bool(
+            forKey: "PointExternalAgentAccessEnabled"
+        )
+        if ownsAccess, isExternalAgentAccessEnabled {
+            startExternalAgentServer()
+        } else if !ownsAccess {
+            pointMCPRestartTask?.cancel()
+            pointMCPRestartTask = nil
+            pointMCPServer?.stop()
+            pointMCPServer = nil
+        }
+    }
+
+    public func setExternalAgentAccessEnabled(_ enabled: Bool) {
+        guard allowsExternalAgentAccess else { return }
+        isExternalAgentAccessEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "PointExternalAgentAccessEnabled")
+        if enabled {
+            startExternalAgentServer()
+        } else {
+            pointMCPRestartTask?.cancel()
+            pointMCPRestartTask = nil
+            pointMCPServer?.stop()
+            pointMCPServer = nil
+        }
+    }
+
+    public func setAutomaticallyAllowsExternalAgentControl(_ enabled: Bool) {
+        guard allowsExternalAgentAccess else { return }
+        automaticallyAllowsExternalAgentControl = enabled
+        UserDefaults.standard.set(enabled, forKey: "PointExternalAgentAutoApproveControl")
+    }
+
+    var pointMCPHelperPath: String {
+        Bundle.main.bundleURL
+            .appending(path: "Contents/Helpers/point-browser-mcp")
+            .path
+    }
+
+    private func startExternalAgentServer() {
+        guard pointMCPServer == nil else { return }
+        let server = PointMCPServer(
+            bridgeFactory: { [weak self] in
+                guard let self else { fatalError("Browser window closed") }
+                return BrowserAIToolBridge(
+                    model: self,
+                    automaticallyApprovesControl: { [weak self] in
+                        self?.automaticallyAllowsExternalAgentControl ?? false
+                    }
+                )
+            },
+            stateHandler: { [weak self] state in
+                self?.externalAgentServerState = state
+                if case .failed = state {
+                    self?.scheduleExternalAgentServerRestart()
+                } else if state == .listening || state == .connected {
+                    self?.pointMCPRestartAttempt = 0
+                }
+            }
+        )
+        pointMCPServer = server
+        server.start()
+    }
+
+    private func scheduleExternalAgentServerRestart() {
+        guard isExternalAgentAccessEnabled, allowsExternalAgentAccess,
+              pointMCPRestartTask == nil else { return }
+        pointMCPRestartAttempt += 1
+        let delay = min(30, 1 << min(pointMCPRestartAttempt - 1, 5))
+        pointMCPRestartTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled, let self,
+                  self.isExternalAgentAccessEnabled,
+                  self.allowsExternalAgentAccess else { return }
+            self.pointMCPServer?.stop()
+            self.pointMCPServer = nil
+            self.pointMCPRestartTask = nil
+            self.startExternalAgentServer()
+        }
     }
 
     /// The live web view for a tab, prepared for the agent to work in whether
@@ -2121,6 +2273,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
     public func webEngineDidChange(_ session: WebEngineSession) {
         guard let tab = tab(for: session) else { return }
         tab.title = session.title
+        tab.mediaPlayback = session.mediaPlayback
         tab.progress = session.estimatedProgress
         tab.isLoading = session.isLoading
         if tab.isShowingRestorationPlaceholder,
@@ -2139,8 +2292,74 @@ public final class BrowserWindowModel: WebEngineEventSink {
         }
     }
 
+    public func webEngineRequestedPictureInPictureReturn(_ session: WebEngineSession) {
+        guard tab(session.tabID)?.engine === session else { return }
+        selectTab(session.tabID)
+        focusHostWindowForPictureInPictureReturn()
+    }
+
+    func setHostWindow(_ window: NSWindow?) {
+        hostWindow = window
+    }
+
+    private func focusHostWindowForPictureInPictureReturn() {
+        guard let window = hostWindow else {
+            NSApp.activate()
+            return
+        }
+
+        let needsSpaceMove = !window.isOnActiveSpace
+            && !window.styleMask.contains(.fullScreen)
+        let originalBehavior = window.collectionBehavior
+        if needsSpaceMove {
+            // A visible window does not reliably move when moveToActiveSpace
+            // is added after it was opened. Joining all Spaces first makes it
+            // available on the current desktop before activation.
+            window.collectionBehavior.remove(.moveToActiveSpace)
+            window.collectionBehavior.insert(.canJoinAllSpaces)
+        }
+
+        if window.isMiniaturized {
+            window.deminiaturize(nil)
+        }
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate()
+        window.orderFrontRegardless()
+        window.makeKeyAndOrderFront(nil)
+
+        // The PiP button belongs to a system process, so a plain activate()
+        // request can lack the activation context macOS requires. Workspace
+        // handles that handoff through Launch Services for the existing app.
+        Task { @MainActor [weak window] in
+            let applicationURL = Bundle.main.bundleURL
+            if applicationURL.pathExtension == "app" {
+                let configuration = NSWorkspace.OpenConfiguration()
+                configuration.activates = true
+                configuration.createsNewApplicationInstance = false
+                configuration.allowsRunningApplicationSubstitution = false
+                configuration.addsToRecentItems = false
+                configuration.promptsUserIfNeeded = false
+                _ = try? await NSWorkspace.shared.openApplication(
+                    at: applicationURL,
+                    configuration: configuration
+                )
+            } else {
+                NSApp.activate()
+            }
+
+            guard let window else { return }
+            window.orderFrontRegardless()
+            window.makeKeyAndOrderFront(nil)
+            if needsSpaceMove {
+                try? await Task.sleep(for: .milliseconds(250))
+                window.collectionBehavior = originalBehavior
+            }
+        }
+    }
+
     public func webEngineDidCommit(_ session: WebEngineSession) {
         guard let tab = tab(for: session), let committedURL = session.url else { return }
+        tab.mediaPlayback = nil
         tab.isShowingRestorationPlaceholder = false
         let previousCacheKey = tab.url.flatMap(FaviconCacheKey.make(for:))
         tab.url = committedURL
@@ -2237,6 +2456,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
             return
         }
         guard let tab = tab(for: session) else { return }
+        tab.mediaPlayback = nil
         tab.pendingNavigationHistoryIndex = nil
         cancelMediaPermissionRequests(for: tab.id)
         tab.lifecycleState = .crashed
@@ -2625,6 +2845,9 @@ public final class BrowserWindowModel: WebEngineEventSink {
         recordTabActivation(tab.id)
         expandFolderPath(containing: tab)
         let engine = ensureEngine(for: tab)
+        if pictureInPictureWindowVisible {
+            engine.setAutomaticPictureInPictureVisible(true)
+        }
         engine.setMediaPlaybackSuspended(false)
         tab.lifecycleState = .active
         tab.lastInteractionAt = Date()
@@ -2637,6 +2860,9 @@ public final class BrowserWindowModel: WebEngineEventSink {
 
         for companion in activeSplitTabs where companion.id != tab.id {
             let companionEngine = ensureEngine(for: companion)
+            if pictureInPictureWindowVisible {
+                companionEngine.setAutomaticPictureInPictureVisible(true)
+            }
             companionEngine.setMediaPlaybackSuspended(false)
             companion.lifecycleState = .active
             companion.lastInteractionAt = tab.lastInteractionAt
@@ -2676,6 +2902,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
     }
 
     private func backgroundVisibleTabs() {
+        requestAutomaticPictureInPictureForVisibleTabs()
         let now = Date()
         for tab in tabs where tab.lifecycleState == .active {
             tab.lifecycleState = .liveBackground
@@ -2694,6 +2921,35 @@ public final class BrowserWindowModel: WebEngineEventSink {
             passkeyAccessManager.refreshState()
         }
         reconcileLifecycle()
+    }
+
+    public func setPictureInPictureWindowVisible(_ visible: Bool) {
+        guard pictureInPictureWindowVisible != visible else { return }
+        pictureInPictureWindowVisible = visible
+        if visible {
+            for tab in tabs where tab.engine?.isPresentingPictureInPicture == true {
+                tab.engine?.setAutomaticPictureInPictureVisible(true)
+            }
+            for tab in activeSplitTabs {
+                tab.engine?.setAutomaticPictureInPictureVisible(true)
+            }
+            if activeSplitTabs.isEmpty {
+                activeTab?.engine?.setAutomaticPictureInPictureVisible(true)
+            }
+        } else {
+            requestAutomaticPictureInPictureForVisibleTabs()
+        }
+    }
+
+    public func toggleMediaPlayback(for tabID: TabID) {
+        tab(tabID)?.engine?.toggleMediaPlayback()
+    }
+
+    private func requestAutomaticPictureInPictureForVisibleTabs() {
+        let visibleTabs = [activeTab].compactMap { $0 } + activeSplitTabs
+        guard let tab = visibleTabs.first(where: { $0.engine?.hasPlayingVideo == true }),
+              let engine = tab.engine else { return }
+        engine.setAutomaticPictureInPictureVisible(false)
     }
 
     public func stopLifecycleMonitoring() {
@@ -3249,6 +3505,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
             engine.invalidate()
         }
         tab.engine = nil
+        tab.mediaPlayback = nil
         tab.engineProtectionReasons = []
         tab.lifecycleState = .evicted
         tab.isLoading = false
@@ -3269,6 +3526,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
         tab.engine?.setMediaPlaybackSuspended(false)
         tab.engine?.invalidate()
         tab.engine = nil
+        tab.mediaPlayback = nil
     }
 
     private func protectionReasons(
@@ -3301,6 +3559,7 @@ public final class BrowserWindowModel: WebEngineEventSink {
         if session.isPlayingMedia { reasons.insert(.audibleMedia) }
         if session.hasActiveCapture { reasons.insert(.capture) }
         if session.isElementFullscreen { reasons.insert(.fullscreen) }
+        if session.isPresentingPictureInPicture { reasons.insert(.pictureInPicture) }
         if session.hasPendingUIFlow { reasons.insert(.pendingUIFlow) }
         return reasons
     }

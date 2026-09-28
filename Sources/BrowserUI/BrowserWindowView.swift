@@ -38,7 +38,6 @@ public struct BrowserWindowView: View {
         SidebarLayout.defaultWidth
     @State private var liveSidebarWidth: Double?
     @State private var hideTask: Task<Void, Never>?
-    @State private var dismissedDownloadIndicators: Set<UUID> = []
     @State private var isFullScreen = false
     @State private var hostWindow: NSWindow?
     @State private var bookmarkTargetFrame = CGRect.zero
@@ -147,7 +146,7 @@ public struct BrowserWindowView: View {
 
             if let download = indicatorDownload {
                 DownloadProgressBubble(download: download) {
-                    dismissedDownloadIndicators.insert(download.id)
+                    model.presentDownloads()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(
@@ -168,6 +167,19 @@ public struct BrowserWindowView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                     .allowsHitTesting(false)
                     .zIndex(20)
+            }
+
+            if !model.isAIChatPanelVisible,
+               let request = model.agentConsent.current {
+                AgentConsentCard(request: request) { approved in
+                    model.agentConsent.resolve(request.id, approved: approved)
+                }
+                .frame(width: 360)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(.trailing, 18)
+                .padding(.bottom, 18)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .zIndex(90)
             }
 
             if let prompt = model.mediaPermissionPrompt {
@@ -359,6 +371,7 @@ public struct BrowserWindowView: View {
         .frame(minWidth: 760, minHeight: 520)
         .background(
             WindowAccessor(
+                model: model,
                 showsTrafficLights: model.isSidebarVisible,
                 isPrivate: model.isPrivate,
                 isFullScreen: $isFullScreen,
@@ -397,6 +410,35 @@ public struct BrowserWindowView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             model.setApplicationActive(phase == .active)
+            refreshPictureInPictureVisibility()
+        }
+        .onChange(of: hostWindow) {
+            refreshPictureInPictureVisibility()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: NSWindow.didChangeOcclusionStateNotification
+            )
+        ) { notification in
+            guard let window = notification.object as? NSWindow,
+                  window === hostWindow else { return }
+            refreshPictureInPictureVisibility()
+        }
+        .onReceive(
+            NSWorkspace.shared.notificationCenter.publisher(
+                for: NSWorkspace.activeSpaceDidChangeNotification
+            )
+        ) { _ in
+            // The notification can arrive before AppKit updates occlusion.
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(150))
+                refreshPictureInPictureVisibility()
+            }
+        }
+        .onChange(of: model.agentConsent.current?.id) { _, requestID in
+            guard requestID != nil, !NSApp.isActive,
+                  let request = model.agentConsent.current else { return }
+            AgentConsentNotifier.notify(for: request)
         }
         .onReceive(
             NotificationCenter.default.publisher(for: BrowserOnboarding.replayRequest)
@@ -423,13 +465,20 @@ public struct BrowserWindowView: View {
         model.isAIChatPanelVisible ? CGFloat(AIChatSettings.shared.panelWidth) : 0
     }
 
+    private func refreshPictureInPictureVisibility() {
+        guard let hostWindow else { return }
+        let visible = NSApp.isActive &&
+            hostWindow.occlusionState.contains(.visible)
+        model.setPictureInPictureWindowVisible(visible)
+    }
+
     private var sidebarWidth: CGFloat {
         CGFloat(SidebarLayout.clamp(liveSidebarWidth ?? storedSidebarWidth))
     }
 
     private var indicatorDownload: DownloadItem? {
         model.downloadManager.items.first { item in
-            item.state.isActive && !dismissedDownloadIndicators.contains(item.id)
+            item.state.isActive
         }
     }
 
@@ -812,20 +861,19 @@ private struct EdgeHoverSensor: NSViewRepresentable {
 
 private struct DownloadProgressBubble: View {
     let download: DownloadItem
-    let onDismiss: () -> Void
+    let onOpenDownloads: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @State private var isHovering = false
     @State private var rotates = false
 
     var body: some View {
-        Button(action: onDismiss) {
+        Button(action: onOpenDownloads) {
             ZStack {
                 glassCore
                 progressRing
 
-                Image(systemName: isHovering ? "xmark" : "arrow.down")
+                Image(systemName: "arrow.down")
                     .font(.system(size: 14, weight: .semibold))
                     .contentTransition(.symbolEffect(.replace))
             }
@@ -833,8 +881,7 @@ private struct DownloadProgressBubble: View {
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .onHover { isHovering = $0 }
-        .help(BrowserLocalization.string("hide_download_indicator"))
+        .help(BrowserLocalization.string("downloads"))
         .accessibilityLabel(BrowserLocalization.string(
             "download_progress_label",
             download.suggestedFilename,
@@ -1289,6 +1336,7 @@ private struct LoadingBar: View {
 }
 
 private struct WindowAccessor: NSViewRepresentable {
+    let model: BrowserWindowModel
     let showsTrafficLights: Bool
     let isPrivate: Bool
     @Binding var isFullScreen: Bool
@@ -1409,6 +1457,7 @@ private struct WindowAccessor: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
         DispatchQueue.main.async {
+            model.setHostWindow(view.window)
             context.coordinator.configure(
                 view.window,
                 showsTrafficLights: showsTrafficLights,
@@ -1424,6 +1473,7 @@ private struct WindowAccessor: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSView, context: Context) {
         DispatchQueue.main.async {
+            model.setHostWindow(nsView.window)
             context.coordinator.configure(
                 nsView.window,
                 showsTrafficLights: showsTrafficLights,
