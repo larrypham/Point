@@ -83,8 +83,9 @@ private final class BrowserRuntime {
         manualUpdateCoordinator = ManualUpdateCoordinator()
         let controller = try? BrowserPersistenceController()
         persistenceController = controller
-        browsingHistoryRepository = controller?.browsingHistoryRepository()
-            ?? FileBrowsingHistoryRepository()
+        // History uses its dedicated file store. Unlike the SwiftData history
+        // path, this repository records URL values reliably across launches.
+        browsingHistoryRepository = FileBrowsingHistoryRepository()
         bookmarkRepository = FileBookmarkRepository()
     }
 

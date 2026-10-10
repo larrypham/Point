@@ -2945,7 +2945,19 @@ public final class BrowserWindowModel: WebEngineEventSink {
         tab(tabID)?.engine?.toggleMediaPlayback()
     }
 
+    public func togglePictureInPicture(for tabID: TabID) {
+        tab(tabID)?.engine?.togglePictureInPicture()
+    }
+
+    public func setAutomaticPictureInPictureEnabled(_ enabled: Bool) {
+        guard !enabled else { return }
+        for tab in tabs {
+            tab.engine?.setAutomaticPictureInPictureVisible(true)
+        }
+    }
+
     private func requestAutomaticPictureInPictureForVisibleTabs() {
+        guard PictureInPictureSettings.automaticallyStarts else { return }
         let visibleTabs = [activeTab].compactMap { $0 } + activeSplitTabs
         guard let tab = visibleTabs.first(where: { $0.engine?.hasPlayingVideo == true }),
               let engine = tab.engine else { return }
@@ -3212,13 +3224,35 @@ public final class BrowserWindowModel: WebEngineEventSink {
             return
         }
         let repository = browsingHistoryRepository
-        tab.browsingHistoryRecordTask = Task {
-            try? await repository.recordVisit(
-                url: url,
-                title: title,
-                visitedAt: Date()
-            )
+        tab.browsingHistoryRecordTask = Task { @MainActor [weak self] in
+            do {
+                let entry = try await repository.recordVisit(
+                    url: url,
+                    title: title,
+                    visitedAt: Date()
+                )
+                guard let self else { return entry }
+                mergeRecordedHistoryEntry(entry)
+                return entry
+            } catch {
+                guard let self, isBrowsingHistoryPresented else { return nil }
+                browsingHistoryError = BrowserLocalization.string(
+                    "load_history_failed",
+                    error.localizedDescription
+                )
+                isLoadingBrowsingHistory = false
+                return nil
+            }
         }
+    }
+
+    private func mergeRecordedHistoryEntry(_ entry: BrowsingHistoryEntry) {
+        browsingHistory.removeAll { $0.id == entry.id }
+        browsingHistory.insert(entry, at: 0)
+        if browsingHistory.count > 500 {
+            browsingHistory.removeLast(browsingHistory.count - 500)
+        }
+        browsingHistoryError = nil
     }
 
     private func stopMediaCapture(for origins: Set<SiteOrigin>) {

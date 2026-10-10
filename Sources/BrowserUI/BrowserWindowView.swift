@@ -1015,7 +1015,7 @@ private struct WebSurface: View {
                     .transition(.opacity)
             }
         } else {
-            Color(nsColor: .textBackgroundColor)
+            EmptyTabBackgroundView()
         }
     }
 

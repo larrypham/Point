@@ -251,6 +251,41 @@ public final class WebEngineSession: NSObject {
         }
     }
 
+    public func togglePictureInPicture() {
+        let presentingFrame = videoFrames.first(where: { $0.value.pictureInPicture })
+        let candidates = videoFrames
+            .filter { $0.value.playing && !$0.value.pictureInPicture }
+            .sorted { $0.value.updatedAt > $1.value.updatedAt }
+        guard presentingFrame != nil || !candidates.isEmpty else { return }
+
+        pictureInPictureRestoreTask?.cancel()
+        pictureInPictureRestoreTask = nil
+        automaticPictureInPictureFrameID = nil
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let presentingFrame {
+                _ = try? await webView.callAsyncJavaScript(
+                    VideoPictureInPicture.exitScript,
+                    arguments: [:],
+                    in: presentingFrame.value.frameInfo,
+                    contentWorld: WKContentWorld.world(name: "PointPictureInPicture")
+                )
+                return
+            }
+
+            for candidate in candidates {
+                let value = try? await webView.callAsyncJavaScript(
+                    VideoPictureInPicture.enterScript,
+                    arguments: [:],
+                    in: candidate.value.frameInfo,
+                    contentWorld: WKContentWorld.world(name: "PointPictureInPicture")
+                )
+                if value as? Bool == true { return }
+            }
+        }
+    }
+
     private func requestAutomaticPictureInPicture() {
         guard !pictureInPictureRequestInFlight,
               automaticPictureInPictureFrameID == nil,

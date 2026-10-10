@@ -56,6 +56,431 @@
         }
       }
     },
+    "agent_notification_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point needs your approval"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point ожидает разрешения"
+          }
+        }
+      }
+    },
+    "agent_settings_auto_approve" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow control without asking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешать управление без запроса"
+          }
+        }
+      }
+    },
+    "agent_settings_auto_approve_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connected MCP agents can start controlling pages immediately. Point will still confirm consequential actions."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключённые MCP-агенты смогут сразу управлять страницами. Значимые действия по-прежнему потребуют подтверждения."
+          }
+        }
+      }
+    },
+    "agent_settings_bridge_invalid" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use a valid HTTPS address."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите корректный HTTPS-адрес."
+          }
+        }
+      }
+    },
+    "agent_settings_bridge_unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A hosted bridge is required for ChatGPT Web and mobile access."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для ChatGPT Web и доступа с телефона нужен развёрнутый bridge."
+          }
+        }
+      }
+    },
+    "agent_settings_bridge_url" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP bridge URL"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL MCP bridge"
+          }
+        }
+      }
+    },
+    "agent_settings_coming_soon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming soon"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скоро"
+          }
+        }
+      }
+    },
+    "agent_settings_command" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STDIO server command"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Команда STDIO-сервера"
+          }
+        }
+      }
+    },
+    "agent_settings_copied" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировано"
+          }
+        }
+      }
+    },
+    "agent_settings_copy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy command"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать команду"
+          }
+        }
+      }
+    },
+    "agent_settings_copy_url" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy MCP URL"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать MCP URL"
+          }
+        }
+      }
+    },
+    "agent_settings_enable_local" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow local AI agents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить локальных ИИ-агентов"
+          }
+        }
+      }
+    },
+    "agent_settings_local" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local access"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Локальный доступ"
+          }
+        }
+      }
+    },
+    "agent_settings_local_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect Codex, Claude Code, or another MCP client. Point asks before every control session and keeps browser data inside the app."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключайте Codex, Claude Code или другой MCP-клиент. Point запрашивает разрешение для каждой сессии и не отдаёт управление WebKit внешнему процессу."
+          }
+        }
+      }
+    },
+    "agent_settings_owner_window" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage agent access from the first open Point window."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управляйте доступом агентов из первого открытого окна Point."
+          }
+        }
+      }
+    },
+    "agent_settings_remote" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remote bridge"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалённый bridge"
+          }
+        }
+      }
+    },
+    "agent_settings_remote_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect ChatGPT Web and mobile agents to Point through a secure personal MCP URL."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключайте ChatGPT Web и мобильных агентов к Point через безопасный персональный MCP URL."
+          }
+        }
+      }
+    },
+    "agent_settings_safety" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safety"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Безопасность"
+          }
+        }
+      }
+    },
+    "agent_settings_safety_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point confirms consequential actions and never lets agents enter passwords, one-time codes, payment details, or choose files."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Point подтверждает значимые действия и не разрешает агентам вводить пароли, одноразовые коды, платёжные данные или выбирать файлы."
+          }
+        }
+      }
+    },
+    "agent_settings_status" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статус"
+          }
+        }
+      }
+    },
+    "agent_settings_status_connected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent connected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Агент подключён"
+          }
+        }
+      }
+    },
+    "agent_settings_status_failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not start"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось запустить"
+          }
+        }
+      }
+    },
+    "agent_settings_status_ready" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready for connection"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готов к подключению"
+          }
+        }
+      }
+    },
+    "agent_settings_status_stopped" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выключено"
+          }
+        }
+      }
+    },
+    "agent_step_clicked" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicked “%@”"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажал «%@»"
+          }
+        }
+      }
+    },
     "ai_chat_attach" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -151,28 +576,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compacting the conversation…"
-          }
-        }
-      }
-    },
-    "agent_notification_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point needs your approval" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point ожидает разрешения" } }
-      }
-    },
-    "agent_step_clicked": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clicked “%@”"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нажал «%@»"
           }
         }
       }
@@ -2017,6 +2420,210 @@
         }
       }
     },
+    "empty_tab_background" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty Tab Background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фон пустой вкладки"
+          }
+        }
+      }
+    },
+    "empty_tab_background_aurora" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aurora"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сияние"
+          }
+        }
+      }
+    },
+    "empty_tab_background_automatic" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматически"
+          }
+        }
+      }
+    },
+    "empty_tab_background_choose_image" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Image…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать изображение…"
+          }
+        }
+      }
+    },
+    "empty_tab_background_choose_prompt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose an image for empty tabs"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите изображение для пустых вкладок"
+          }
+        }
+      }
+    },
+    "empty_tab_background_custom" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свой фон"
+          }
+        }
+      }
+    },
+    "empty_tab_background_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the background shown in windows when the current tab is empty."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите фон окна, который отображается, когда текущая вкладка пуста."
+          }
+        }
+      }
+    },
+    "empty_tab_background_graphite" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphite"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Графит"
+          }
+        }
+      }
+    },
+    "empty_tab_background_import_failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t Use Image"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось использовать изображение"
+          }
+        }
+      }
+    },
+    "empty_tab_background_ocean" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocean"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Океан"
+          }
+        }
+      }
+    },
+    "empty_tab_background_remove_image" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Custom Image"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить своё изображение"
+          }
+        }
+      }
+    },
+    "empty_tab_background_sunset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunset"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закат"
+          }
+        }
+      }
+    },
     "expand_preview" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2524,6 +3131,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Make Default Browser"
+          }
+        }
+      }
+    },
+    "media_open_tab" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to playing tab"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти к вкладке с воспроизведением"
+          }
+        }
+      }
+    },
+    "media_pause" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause playback"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приостановить воспроизведение"
+          }
+        }
+      }
+    },
+    "media_play" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume playback"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить воспроизведение"
           }
         }
       }
@@ -3111,6 +3769,23 @@
         }
       }
     },
+    "open_file" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open File"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть файл"
+          }
+        }
+      }
+    },
     "open_in_other_app" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3310,6 +3985,91 @@
         }
       }
     },
+    "picture_in_picture" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Picture in Picture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картинка в картинке"
+          }
+        }
+      }
+    },
+    "picture_in_picture_automatic" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Picture in Picture automatically"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматически включать режим «Картинка в картинке»"
+          }
+        }
+      }
+    },
+    "picture_in_picture_automatic_detail" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a tab with a playing video is hidden, continue it in a floating window."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда вкладка с воспроизводимым видео скрыта, продолжать просмотр в плавающем окне."
+          }
+        }
+      }
+    },
+    "picture_in_picture_enter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Picture in Picture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить режим «Картинка в картинке»"
+          }
+        }
+      }
+    },
+    "picture_in_picture_exit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exit Picture in Picture"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти из режима «Картинка в картинке»"
+          }
+        }
+      }
+    },
     "pin" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3416,70 +4176,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quit"
-          }
-        }
-      }
-    },
-    "media_open_tab": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Go to playing tab"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перейти к вкладке с воспроизведением"
-          }
-        }
-      }
-    },
-    "media_pause": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause playback"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Приостановить воспроизведение"
-          }
-        }
-      }
-    },
-    "media_play": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resume playback"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Продолжить воспроизведение"
-          }
-        }
-      }
-    },
-    "open_tab": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Tab"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открытая вкладка"
           }
         }
       }
@@ -3843,6 +4539,23 @@
         }
       }
     },
+    "selected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрано"
+          }
+        }
+      }
+    },
     "selected_data_removed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3883,6 +4596,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Could Not Restore Session: %@"
+          }
+        }
+      }
+    },
+    "settings_section_agents" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Agents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ИИ-агенты"
           }
         }
       }
@@ -3970,180 +4700,6 @@
             "value" : "Настройки"
           }
         }
-      }
-    },
-    "agent_settings_bridge_invalid": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Use a valid HTTPS address." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Введите корректный HTTPS-адрес." } }
-      }
-    },
-    "agent_settings_auto_approve": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Allow control without asking" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Разрешать управление без запроса" } }
-      }
-    },
-    "agent_settings_auto_approve_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Connected MCP agents can start controlling pages immediately. Point will still confirm consequential actions." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Подключённые MCP-агенты смогут сразу управлять страницами. Значимые действия по-прежнему потребуют подтверждения." } }
-      }
-    },
-    "agent_settings_bridge_unavailable": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "A hosted bridge is required for ChatGPT Web and mobile access." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Для ChatGPT Web и доступа с телефона нужен развёрнутый bridge." } }
-      }
-    },
-    "agent_settings_bridge_url": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "MCP bridge URL" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "URL MCP bridge" } }
-      }
-    },
-    "agent_settings_command": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "STDIO server command" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Команда STDIO-сервера" } }
-      }
-    },
-    "agent_settings_copied": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Copied" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Скопировано" } }
-      }
-    },
-    "agent_settings_copy": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Copy command" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Скопировать команду" } }
-      }
-    },
-    "agent_settings_copy_url": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Copy MCP URL" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Скопировать MCP URL" } }
-      }
-    },
-    "agent_settings_coming_soon": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Coming soon" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Скоро" } }
-      }
-    },
-    "agent_settings_enable_local": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Allow local AI agents" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Разрешить локальных ИИ-агентов" } }
-      }
-    },
-    "agent_settings_local": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Local access" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Локальный доступ" } }
-      }
-    },
-    "agent_settings_local_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Connect Codex, Claude Code, or another MCP client. Point asks before every control session and keeps browser data inside the app." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Подключайте Codex, Claude Code или другой MCP-клиент. Point запрашивает разрешение для каждой сессии и не отдаёт управление WebKit внешнему процессу." } }
-      }
-    },
-    "agent_settings_owner_window": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Manage agent access from the first open Point window." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Управляйте доступом агентов из первого открытого окна Point." } }
-      }
-    },
-    "agent_settings_remote": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Remote bridge" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Удалённый bridge" } }
-      }
-    },
-    "agent_settings_remote_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Connect ChatGPT Web and mobile agents to Point through a secure personal MCP URL." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Подключайте ChatGPT Web и мобильных агентов к Point через безопасный персональный MCP URL." } }
-      }
-    },
-    "agent_settings_safety": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Safety" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Безопасность" } }
-      }
-    },
-    "agent_settings_safety_detail": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Point confirms consequential actions and never lets agents enter passwords, one-time codes, payment details, or choose files." } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Point подтверждает значимые действия и не разрешает агентам вводить пароли, одноразовые коды, платёжные данные или выбирать файлы." } }
-      }
-    },
-    "agent_settings_status": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Status" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Статус" } }
-      }
-    },
-    "agent_settings_status_connected": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Agent connected" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Агент подключён" } }
-      }
-    },
-    "agent_settings_status_failed": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Could not start" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Не удалось запустить" } }
-      }
-    },
-    "agent_settings_status_ready": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Ready for connection" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Готов к подключению" } }
-      }
-    },
-    "agent_settings_status_stopped": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Off" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Выключено" } }
-      }
-    },
-    "settings_title": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Settings" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Настройки" } }
-      }
-    },
-    "settings_section_appearance": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Appearance" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Оформление" } }
-      }
-    },
-    "settings_section_assistant": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Assistant" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Ассистент" } }
-      }
-    },
-    "settings_section_agents": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "AI Agents" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "ИИ-агенты" } }
-      }
-    },
-    "settings_section_general": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "General" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Основные" } }
-      }
-    },
-    "settings_section_performance": {
-      "localizations": {
-        "en": { "stringUnit": { "state": "translated", "value": "Performance" } },
-        "ru": { "stringUnit": { "state": "translated", "value": "Производительность" } }
       }
     },
     "show_bookmark_manager" : {
@@ -4303,38 +4859,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Название пространства"
-          }
-        }
-      }
-    },
-    "open_file": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open File"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Открыть файл"
-          }
-        }
-      }
-    },
-    "show_in_finder": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show in Finder"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показать в Finder"
           }
         }
       }

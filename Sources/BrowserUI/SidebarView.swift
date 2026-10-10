@@ -580,6 +580,27 @@ private struct SidebarMediaPlayer: View {
             .buttonStyle(.plain)
             .help(BrowserLocalization.string("media_open_tab"))
 
+            if tab.mediaPlayback?.kind == .video {
+                Button {
+                    model.togglePictureInPicture(for: tab.id)
+                } label: {
+                    Image(systemName: tab.engine?.isPresentingPictureInPicture == true
+                        ? "pip.exit" : "pip.enter")
+                        .font(.system(size: 12, weight: .semibold))
+                        .frame(width: 30, height: 30)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .help(BrowserLocalization.string(
+                    tab.engine?.isPresentingPictureInPicture == true
+                        ? "picture_in_picture_exit" : "picture_in_picture_enter"
+                ))
+                .accessibilityLabel(BrowserLocalization.string(
+                    tab.engine?.isPresentingPictureInPicture == true
+                        ? "picture_in_picture_exit" : "picture_in_picture_enter"
+                ))
+            }
+
             Button {
                 model.toggleMediaPlayback(for: tab.id)
             } label: {

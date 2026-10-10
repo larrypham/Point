@@ -43,6 +43,7 @@ struct BrowserWindowNavigationTests {
             repository: InMemorySessionRepository(),
             sitePermissionRepository: InMemorySitePermissionRepository(),
             browsingHistoryRepository: InMemoryBrowsingHistoryRepository(),
+            bookmarkRepository: InMemoryBookmarkRepository(),
             isPrivate: true
         )
     }

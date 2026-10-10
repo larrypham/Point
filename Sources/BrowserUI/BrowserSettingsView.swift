@@ -3,6 +3,19 @@ import BrowserAI
 import BrowserCore
 import SwiftUI
 
+enum PictureInPictureSettings {
+    static let automaticallyStartsKey = "AutomaticallyStartPictureInPicture"
+    static let defaultAutomaticallyStarts = true
+
+    static var automaticallyStarts: Bool {
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: automaticallyStartsKey) != nil else {
+            return defaultAutomaticallyStarts
+        }
+        return defaults.bool(forKey: automaticallyStartsKey)
+    }
+}
+
 public enum BrowserSettingsSection: String, CaseIterable, Identifiable {
     case general
     case appearance
@@ -31,6 +44,9 @@ public struct BrowserSettingsView: View {
     @Bindable private var model: BrowserWindowModel
     @AppStorage(BrowserMemoryLimitSettings.defaultsKey)
     private var memoryLimitFraction = BrowserMemoryLimitSettings.defaultFraction
+    @AppStorage(PictureInPictureSettings.automaticallyStartsKey)
+    private var automaticallyStartsPictureInPicture =
+        PictureInPictureSettings.defaultAutomaticallyStarts
     @Bindable private var aiSettings = AIChatSettings.shared
     @Bindable private var memories = AIMemoryStore.shared
 
@@ -96,6 +112,9 @@ public struct BrowserSettingsView: View {
             if normalized != newValue {
                 memoryLimitFraction = normalized
             }
+        }
+        .onChange(of: automaticallyStartsPictureInPicture) { _, newValue in
+            model.setAutomaticPictureInPictureEnabled(newValue)
         }
     }
 
@@ -206,6 +225,18 @@ public struct BrowserSettingsView: View {
                 }
             }
 
+            Section(BrowserLocalization.string("picture_in_picture")) {
+                Toggle(
+                    BrowserLocalization.string("picture_in_picture_automatic"),
+                    isOn: $automaticallyStartsPictureInPicture
+                )
+
+                Text(BrowserLocalization.string("picture_in_picture_automatic_detail"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             Section(BrowserLocalization.string("updates")) {
                 Text(BrowserLocalization.string("updates_detail"))
                     .font(.caption)
@@ -257,6 +288,15 @@ public struct BrowserSettingsView: View {
 
     private var appearanceSettings: some View {
         Form {
+            Section(BrowserLocalization.string("empty_tab_background")) {
+                Text(BrowserLocalization.string("empty_tab_background_detail"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                EmptyTabBackgroundPicker()
+            }
+
             Section(BrowserLocalization.string("fullscreen_panels")) {
                 Text(BrowserLocalization.string("fullscreen_panels_detail"))
                     .font(.caption)

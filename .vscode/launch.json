@@ -19,6 +19,26 @@
             "target": "Browser",
             "configuration": "release",
             "preLaunchTask": "swift: Build Release Browser"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Point}",
+            "name": "Debug point-browser-mcp",
+            "target": "point-browser-mcp",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug point-browser-mcp"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Point}",
+            "name": "Release point-browser-mcp",
+            "target": "point-browser-mcp",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release point-browser-mcp"
         }
     ]
 }
