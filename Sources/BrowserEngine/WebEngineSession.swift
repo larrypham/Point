@@ -156,6 +156,7 @@ public final class WebEngineSession: NSObject {
 
         super.init()
 
+        AdBlockController.shared.register(webView.configuration.userContentController)
         pictureInPictureHandler.session = self
 
         webView.navigationDelegate = self
@@ -722,9 +723,11 @@ extension WebEngineSession: WKNavigationDelegate {
 
         switch disposition {
         case .allowInWebView where ["http", "https", "blob"].contains(scheme):
-            let shouldDownload = navigationAction.shouldPerformDownload
-                && navigationAction.navigationType == .linkActivated
-            decisionHandler(shouldDownload ? .download : .allow)
+            let policy: WKNavigationActionPolicy = navigationAction.shouldPerformDownload ? .download : .allow
+            Task { @MainActor in
+                await AdBlockController.shared.prepare(webView.configuration.userContentController)
+                decisionHandler(policy)
+            }
         case .allowInWebView:
             decisionHandler(.allow)
         case .confirmExternalApplication:
