@@ -30,8 +30,8 @@ struct BrowserApp: App {
     }
 
     var body: some Scene {
-        WindowGroup(id: BrowserSceneID.standard) {
-            BrowserWindowScene(runtime: runtime, isPrivate: false)
+        WindowGroup(id: BrowserSceneID.standard, for: UUID.self) { $requestID in
+            BrowserWindowScene(runtime: runtime, isPrivate: false, extensionRequestID: requestID)
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1180, height: 760)
@@ -237,10 +237,12 @@ private struct BrowserWindowScene: View {
     @State private var isOnboardingPresented = false
     private let runtime: BrowserRuntime
     private let isPrivate: Bool
+    private let extensionRequestID: UUID?
 
-    init(runtime: BrowserRuntime, isPrivate: Bool) {
+    init(runtime: BrowserRuntime, isPrivate: Bool, extensionRequestID: UUID? = nil) {
         self.runtime = runtime
         self.isPrivate = isPrivate
+        self.extensionRequestID = extensionRequestID
         _model = State(
             initialValue: runtime.makeWindowModel(isPrivate: isPrivate)
         )
@@ -276,14 +278,18 @@ private struct BrowserWindowScene: View {
                             : BrowserSceneID.standard
                     )
                 }
+                model.openExtensionWindowRequest = { id in
+                    openWindow(id: BrowserSceneID.standard, value: id)
+                }
                 model.openAIChatWindowRequest = { token in
                     openWindow(id: BrowserSceneID.aiChat, value: token)
                 }
-                if !isPrivate {
+                if !isPrivate, extensionRequestID == nil {
                     await runtime.performMaintenanceIfNeeded()
                     await runtime.startManualUpdateChecks()
                 }
                 await model.restoreSession()
+                if let extensionRequestID { model.completeExtensionWindowRequest(extensionRequestID) }
                 model.startExternalAgentAccessIfNeeded()
                 if !isPrivate,
                    let transferredTabs = BrowserWindowTransferCenter.shared

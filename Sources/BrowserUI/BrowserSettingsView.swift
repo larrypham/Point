@@ -23,6 +23,7 @@ public enum BrowserSettingsSection: String, CaseIterable, Identifiable {
     case assistant
     case agents
     case performance
+    case extensions
 
     public var id: Self { self }
 
@@ -37,6 +38,7 @@ public enum BrowserSettingsSection: String, CaseIterable, Identifiable {
         case .assistant: "sparkles"
         case .agents: "network"
         case .performance: "memorychip"
+        case .extensions: "puzzlepiece.extension"
         }
     }
 }
@@ -189,6 +191,8 @@ public struct BrowserSettingsView: View {
             agentSettings
         case .performance:
             performanceSettings
+        case .extensions:
+            BrowserExtensionsSettingsView(model: model)
         }
     }
 
