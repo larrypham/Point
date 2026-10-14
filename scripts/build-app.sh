@@ -50,11 +50,13 @@ xcrun actool \
     "${APP_ICON}"
 
 SIGNING_IDENTITY="${POINT_SIGNING_IDENTITY:-}"
+# Even with -v, security can list identities marked with certificate errors.
+# Skip those identities instead of selecting a revoked or expired certificate.
 if [[ -z "${SIGNING_IDENTITY}" ]]; then
-    SIGNING_IDENTITY="$(security find-identity -v -p codesigning | awk '/"Developer ID Application:/ {print $2; exit}')"
+    SIGNING_IDENTITY="$(security find-identity -v -p codesigning | awk '/"Developer ID Application:/ && !/CSSMERR_/ {print $2; exit}')"
 fi
 if [[ -z "${SIGNING_IDENTITY}" ]]; then
-    SIGNING_IDENTITY="$(security find-identity -v -p codesigning | awk '/"Apple Development:/ {print $2; exit}')"
+    SIGNING_IDENTITY="$(security find-identity -v -p codesigning | awk '/"Apple Development:/ && !/CSSMERR_/ {print $2; exit}')"
 fi
 if [[ -z "${SIGNING_IDENTITY}" ]]; then
     SIGNING_IDENTITY=-

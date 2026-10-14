@@ -173,7 +173,7 @@ For this trusted beta distribution, create the DMG with:
 make release
 ```
 
-This produces `dist/Point.dmg`. The build selects an available Developer ID Application identity, then Apple Development, or falls back to ad-hoc signing. Set `POINT_SIGNING_IDENTITY` to pin a specific identity. Keep the signing identity stable across builds: ad-hoc signatures identify a particular binary and can trigger repeated Keychain authorization after updates. Apple Development signing provides a stable local identity but does not provide Developer ID distribution or notarization. Upload that exact DMG as every GitHub Release asset.
+This produces `dist/Point.dmg`. The build selects an available Developer ID Application identity, then Apple Development, or falls back to ad-hoc signing. Automatic selection skips identities marked with certificate errors (including revoked or expired certificates), even if `security find-identity -v` lists them. Set `POINT_SIGNING_IDENTITY` to pin a specific identity; an explicit selection is used as-is and signing failures stop the build. Keep the signing identity stable across builds: ad-hoc signatures identify a particular binary and can trigger repeated Keychain authorization after updates. Apple Development signing provides a stable local identity but does not provide Developer ID distribution or notarization. Upload that exact DMG as every GitHub Release asset.
 
 Assistant API keys remain in Keychain. Browser startup initializes assistant preferences without reading secrets; keys are loaded when the user opens the assistant or its settings. Loading never rewrites or removes saved items. Moving from an ad-hoc build to a certificate-signed build may require a one-time Keychain authorization.
 
