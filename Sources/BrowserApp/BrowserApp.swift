@@ -55,6 +55,7 @@ struct BrowserApp: App {
         ) { $token in
             AIChatWindowView(token: token)
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 440, height: 640)
         .windowResizability(.contentMinSize)
     }
@@ -710,8 +711,36 @@ private final class BrowserApplicationDelegate: NSObject, NSApplicationDelegate 
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         normalizeCloseWindowShortcut()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidBecomeKey),
+            name: NSWindow.didBecomeKeyNotification,
+            object: nil
+        )
         DispatchQueue.main.async { [weak self] in
             self?.normalizeCloseWindowShortcut()
+            self?.hideTrafficLightsInEveryWindow()
+        }
+    }
+
+    @objc private func windowDidBecomeKey(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow else { return }
+        hideTrafficLights(in: window)
+    }
+
+    private func hideTrafficLightsInEveryWindow() {
+        for window in NSApp.windows {
+            hideTrafficLights(in: window)
+        }
+    }
+
+    private func hideTrafficLights(in window: NSWindow) {
+        for type in [
+            NSWindow.ButtonType.closeButton,
+            .miniaturizeButton,
+            .zoomButton
+        ] {
+            window.standardWindowButton(type)?.isHidden = true
         }
     }
 

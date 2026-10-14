@@ -210,14 +210,25 @@ public struct BrowserWindowView: View {
                 Color.black.opacity(0.08)
                     .ignoresSafeArea()
                     .onTapGesture { model.dismissOmnibox() }
-                OmniboxOverlay(model: model)
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: model.isComposingNewTab ? .center : .top
-                    )
-                    .padding(.top, model.isComposingNewTab ? 0 : 72)
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                Group {
+                    if model.isComposingNewTab {
+                        GeometryReader { geometry in
+                            // Anchor the 56-point input row, independently of the results below it.
+                            let topInset = max(0, geometry.size.height / 2 - 28)
+                            OmniboxOverlay(
+                                model: model,
+                                maximumSuggestionsHeight: max(0, geometry.size.height - topInset - 56 - 14)
+                            )
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                            .padding(.top, topInset)
+                        }
+                    } else {
+                        OmniboxOverlay(model: model)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                            .padding(.top, 72)
+                    }
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
 
             if model.isTabOverviewPresented {
@@ -386,7 +397,6 @@ public struct BrowserWindowView: View {
         .background(
             WindowAccessor(
                 model: model,
-                showsTrafficLights: model.isSidebarVisible,
                 isPrivate: model.isPrivate,
                 isFullScreen: $isFullScreen,
                 hostWindow: $hostWindow
@@ -1355,16 +1365,13 @@ private struct LoadingBar: View {
 
 private struct WindowAccessor: NSViewRepresentable {
     let model: BrowserWindowModel
-    let showsTrafficLights: Bool
     let isPrivate: Bool
     @Binding var isFullScreen: Bool
     @Binding var hostWindow: NSWindow?
 
     @MainActor
     final class Coordinator: NSObject {
-        var originalButtonFrames: [ObjectIdentifier: NSRect] = [:]
         weak var window: NSWindow?
-        var showsTrafficLights = true
         var isPrivate = false
         var onFullScreenChange: (@MainActor (Bool) -> Void)?
         var lastReportedFullScreen: Bool?
@@ -1375,12 +1382,10 @@ private struct WindowAccessor: NSViewRepresentable {
 
         func configure(
             _ window: NSWindow?,
-            showsTrafficLights: Bool,
             isPrivate: Bool,
             onFullScreenChange: @escaping @MainActor (Bool) -> Void
         ) {
             guard let window else { return }
-            self.showsTrafficLights = showsTrafficLights
             self.isPrivate = isPrivate
             self.onFullScreenChange = onFullScreenChange
 
@@ -1451,18 +1456,6 @@ private struct WindowAccessor: NSViewRepresentable {
                 .zoomButton
             ] {
                 guard let button = window.standardWindowButton(type) else { continue }
-                let key = ObjectIdentifier(button)
-                let originalFrame = originalButtonFrames[key] ?? button.frame
-                originalButtonFrames[key] = originalFrame
-                if !isFullScreen {
-                    button.setFrameOrigin(
-                        NSPoint(
-                            x: originalFrame.origin.x + 14,
-                            y: originalFrame.origin.y - 12
-                        )
-                    )
-                }
-
                 button.isHidden = true
             }
         }
@@ -1478,7 +1471,6 @@ private struct WindowAccessor: NSViewRepresentable {
             model.setHostWindow(view.window)
             context.coordinator.configure(
                 view.window,
-                showsTrafficLights: showsTrafficLights,
                 isPrivate: isPrivate,
                 onFullScreenChange: { isFullScreen = $0 }
             )
@@ -1494,7 +1486,6 @@ private struct WindowAccessor: NSViewRepresentable {
             model.setHostWindow(nsView.window)
             context.coordinator.configure(
                 nsView.window,
-                showsTrafficLights: showsTrafficLights,
                 isPrivate: isPrivate,
                 onFullScreenChange: { isFullScreen = $0 }
             )
